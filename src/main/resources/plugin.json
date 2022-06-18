@@ -1,0 +1,14 @@
+{
+  "name": "DksPlugin",
+  "author": "Ter.DKS",
+  "version": "1.6.18",
+  "minVersion": "1.13.17 beta 106",
+  "supportedVersion": "1.13.17 beta 106",
+  "features": [
+    "com.dks.modules.AegisSentinelModule",
+    "com.dks.behaviours.PalladiumStats"
+  ],
+  "donation" : "https://www.paypal.me/joseankco",
+  "download": "https://a.com",
+  "update": "https://a.com"
+}
