@@ -28,6 +28,7 @@ public abstract class SimpleStats<T extends SimpleStatsConfig> implements Behavi
     protected long lastTick;
     protected boolean isRunning = false;
     protected boolean isFirstTick = true;
+    protected boolean isStoppedTick = false;
 
     protected Duration runningTime = Duration.ofSeconds(0);
     protected double prevAmount;
@@ -73,15 +74,25 @@ public abstract class SimpleStats<T extends SimpleStatsConfig> implements Behavi
         if (this.isFirstTick) {
             this.initTask();
         }
-        if (!this.config.STOP) {
-            if (this.isRunning || runIfPicked()) {
-                refreshRunningTime();
-                if (shouldRefreshData()) {
-                    refreshData();
+        if (!this.isStoppedTick) {
+            if (!this.config.STOP) {
+                if (this.isRunning || runIfPicked()) {
+                    refreshRunningTime();
+                    if (shouldRefreshData()) {
+                        refreshData();
+                    }
                 }
             }
+        } else {
+            this.isStoppedTick = false;
         }
         setStatusMessage();
+    }
+
+    @Override
+    public void onStoppedBehavior() {
+        this.isStoppedTick = true;
+        this.lastTick = System.currentTimeMillis();
     }
 
     protected boolean shouldRefreshData() {
@@ -116,7 +127,7 @@ public abstract class SimpleStats<T extends SimpleStatsConfig> implements Behavi
     protected void initTask() {
         this.isRunning = false;
         setStatusMessage();
-        this.prevAmount = getCurrentAmount();
+        this.prevAmount = this.isStoppedTick ? Integer.MAX_VALUE : this.getCurrentAmount();
         this.totalCollected = 0;
         this.collectedPerHour = 0;
         this.isFirstTick = false;

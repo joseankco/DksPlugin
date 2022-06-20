@@ -1,13 +1,13 @@
 {
   "name": "DksPlugin",
   "author": "Ter.DKS",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "minVersion": "1.13.17 beta 106",
   "supportedVersion": "1.13.17 beta 106",
   "features": [
     "com.dks.behaviours.PalladiumStats"
   ],
   "donation" : "https://www.paypal.me/joseankco",
-  "download": "https://github.com/joseankco/DksPluginReleases/releases/download/v1.0.0/DksPlugin.jar",
+  "download": "https://github.com/joseankco/DksPluginReleases/releases/download/v1.0.1/DksPlugin.jar",
   "update": "https://raw.githubusercontent.com/joseankco/DksPluginReleases/main/plugin.json"
 }
