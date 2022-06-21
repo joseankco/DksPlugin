@@ -4,8 +4,9 @@
   "version": "1.0.1",
   "minVersion": "1.13.17 beta 106",
   "supportedVersion": "1.13.17 beta 106",
+  "basePackage": "eu.darkbot.ter.dks",
   "features": [
-    "com.dks.behaviours.PalladiumStats"
+    "eu.darkbot.ter.dks.behaviours.PalladiumStats"
   ],
   "donation" : "https://www.paypal.me/joseankco",
   "download": "https://github.com/joseankco/DksPluginReleases/releases/download/v1.0.1/DksPlugin.jar",

@@ -1,14 +1,12 @@
-package com.dks.types;
+package eu.darkbot.ter.dks.types;
 
-import com.dks.types.config.SimpleStatsConfig;
+import eu.darkbot.api.extensions.*;
+import eu.darkbot.api.managers.ExtensionsAPI;
+import eu.darkbot.api.managers.I18nAPI;
+import eu.darkbot.ter.dks.types.config.SimpleStatsConfig;
 import eu.darkbot.api.PluginAPI;
 import eu.darkbot.api.config.ConfigSetting;
-import eu.darkbot.api.extensions.Behavior;
-import eu.darkbot.api.extensions.Configurable;
-import eu.darkbot.api.extensions.ExtraMenus;
-import eu.darkbot.api.extensions.InstructionProvider;
 import eu.darkbot.api.managers.AuthAPI;
-import eu.darkbot.api.utils.Inject;
 import eu.darkbot.util.Popups;
 
 import javax.swing.*;
@@ -17,10 +15,14 @@ import java.text.DecimalFormat;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Objects;
 
 public abstract class SimpleStats<T extends SimpleStatsConfig> implements Behavior, Configurable<T>, ExtraMenus, InstructionProvider {
 
     protected final PluginAPI api;
+    protected final I18nAPI i18n;
+    protected final ExtensionsAPI extensions;
+    protected final PluginInfo plugin;
 
     protected T config;
 
@@ -37,15 +39,16 @@ public abstract class SimpleStats<T extends SimpleStatsConfig> implements Behavi
 
     protected final JLabel statusMessage;
 
-    public SimpleStats(PluginAPI api) { this(api, api.requireAPI(AuthAPI.class)); }
-
-    @Inject
-    public SimpleStats(PluginAPI api, AuthAPI auth) {
+    public SimpleStats(PluginAPI api, AuthAPI auth, I18nAPI i18n, ExtensionsAPI extensions) {
         if (!Arrays.equals(VerifierChecker.class.getSigners(), getClass().getSigners()))
             throw new SecurityException();
         VerifierChecker.checkAuthenticity(auth);
 
         this.api = api;
+        this.i18n = i18n;
+        this.extensions = extensions;
+        this.plugin = Objects.requireNonNull(this.extensions.getFeatureInfo(getClass())).getPluginInfo();
+
         this.statusMessage = new JLabel(this.getStatusMessageForLabel());
     }
 
@@ -57,7 +60,7 @@ public abstract class SimpleStats<T extends SimpleStatsConfig> implements Behavi
     @Override
     public Collection<JComponent> getExtraMenuItems(PluginAPI api) {
         return Arrays.asList(
-                this.shouldCreateExtraMenuSeparator() ? createSeparator("DksPlugin") : null,
+                this.shouldCreateExtraMenuSeparator() ? createSeparator(this.i18n.get(this.plugin, "plugin.separator")) : null,
                 create(this.getPopupTitle(), e -> this.showStatusPopup())
         );
     }
@@ -75,7 +78,7 @@ public abstract class SimpleStats<T extends SimpleStatsConfig> implements Behavi
             this.initTask();
         }
         if (!this.isStoppedTick) {
-            if (!this.config.STOP) {
+            if (!this.config.getStop()) {
                 if (this.isRunning || runIfPicked()) {
                     refreshRunningTime();
                     if (shouldRefreshData()) {
@@ -96,7 +99,7 @@ public abstract class SimpleStats<T extends SimpleStatsConfig> implements Behavi
     }
 
     protected boolean shouldRefreshData() {
-        return (System.currentTimeMillis() - this.lastRefresh) >= (config.REFRESH_RATE_S * 1000L);
+        return (System.currentTimeMillis() - this.lastRefresh) >= (config.getRefreshRateSec() * 1000L);
     }
 
     protected void refreshData() {
@@ -161,13 +164,13 @@ public abstract class SimpleStats<T extends SimpleStatsConfig> implements Behavi
     }
 
     protected JButton getShowButton() {
-        JButton show = new JButton("Show Stats");
+        JButton show = new JButton(this.i18n.get(this.plugin, "buttons.show_stats"));
         show.addActionListener(e -> this.showStatusPopup());
         return show;
     }
 
     protected JButton getResetButton() {
-        JButton reset = new JButton("Reset Stats");
+        JButton reset = new JButton(this.i18n.get(this.plugin, "buttons.reset_stats"));
         reset.addActionListener(e -> this.initTask());
         return reset;
     }
@@ -177,16 +180,5 @@ public abstract class SimpleStats<T extends SimpleStatsConfig> implements Behavi
         panel.setLayout(new BorderLayout());
         panel.add(this.statusMessage, BorderLayout.CENTER);
         return panel;
-    }
-
-    /* FORMATTING */
-    protected String formatDuration(Duration duration) {
-        long s = Math.abs(duration.getSeconds());
-        return String.format("%02d:%02d:%02d", s / 3600, (s % 3600) / 60, s % 60);
-    }
-
-    protected String dottedDouble(double value) {
-        DecimalFormat df = new DecimalFormat("###,###,###");
-        return df.format(value).replace(",", ".");
     }
 }

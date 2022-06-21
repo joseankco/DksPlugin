@@ -1,6 +1,6 @@
-package com.dks.types;
+package eu.darkbot.ter.dks.types;
 
-import com.github.manolo8.darkbot.utils.AuthAPI;
+import eu.darkbot.api.managers.AuthAPI;
 
 import java.io.File;
 import java.io.InputStream;
@@ -25,58 +25,13 @@ public class VerifierChecker {
     private static final String SIG_PREFIX = META_INF + "SIG-";
     private static final byte[] POPCORN_PUB = Base64.getDecoder().decode("MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAzqOpdk4bdoMlk3IkDaHFSOpwyYmpfACHCuhNDiml13Wf9J4D9g4kszOV3Qz+FT1jdYO36pWCxI01Mr03dPLky9COwD//dQM/KRFBe7Z0wRsC91n5fprgWIkwdKs79en6vmynyyPi5hAgwpifKm4o9DP5xR0YP/KRoPH8ZekS+STBxPsLdy/BeBiFFFgNQ0usRNIkLBKYWFJ3A3br4QkVicOLvycHKrfsN9K2Ly25VXyYo/GJdeEY30ixKhsCdo9xc50ERVuEVkzqlqLUSFDgHyFAO1o91QIhG+G0GURlI8iSt/b5cn39DM0OtkL+1TqqwT4NJqBH8nHSok8lReu1o/iMu9VbrFyJTUK0qUjVhnySJQV3i5oV0oxwqPodDihvmNUhMUel5gM/yRnloKKEYk+74MLdClgcFWmbEYFUQF32vxdkKpGYYRmzH0Y8+pGKE8nBbe1/eKg2HVu42vStb/yKp7DpxQ05UovJ5nrXA7lUfwCwBOwzOmCjn3AKNhH+Hbg/tutwZn5KNU4zJCRUEM4FLkCCJMEDJTGnpjxNO/vUMEm+Co6RgrD1vBIgRzNxaYh1BInbDdlKncXhysHNR5b6Et2POyCrlrM4flvFvTg42/zbI1ElKgEFNbhujdP5fBtxeD1hkc5UUa8JtYHsHa0LBrTUfnr3F29rRwHFpFUCAwEAAQ==");
 
-    public static void checkAuthenticity() {
-        AuthAPI api = VerifierChecker.getAuthApi();
-        if (!api.isAuthenticated() || api.getAuthId() == null) api.setupAuth();
+    public static void checkAuthenticity(AuthAPI api) {
+        verifyAuthApi(api);
+        if (!api.isAuthenticated()) api.setupAuth();
+        api.getAuthId();
     }
 
-    public static void checkAuthenticity(eu.darkbot.api.managers.AuthAPI auth) {
-        verifyAuthApi(auth);
-        if (!auth.isAuthenticated()) auth.setupAuth();
-        auth.getAuthId();
-    }
-
-    public static void verifyAuthApi(eu.darkbot.api.managers.AuthAPI auth) {
-        try (JarFile jf = new JarFile(findPathJar(auth.getClass()), true)) {
-            Vector<JarEntry> entriesVec = new Vector<>();
-            byte[] buffer = new byte[8192];
-
-            Enumeration<JarEntry> entries = jf.entries();
-            while (entries.hasMoreElements()) {
-                JarEntry je = entries.nextElement();
-                entriesVec.addElement(je);
-
-                try (InputStream is = jf.getInputStream(je)) {
-                    //noinspection StatementWithEmptyBody
-                    while (is.read(buffer, 0, buffer.length) != -1) ;
-                    // we just read. this will throw a SecurityException
-                    // if  a signature/digest check fails.
-                }
-            }
-
-            Manifest man = jf.getManifest();
-
-            if (man == null) throw new SecurityException("Verifier not signed");
-            Enumeration<JarEntry> e = entriesVec.elements();
-
-            // Used to cache allowed certs, no longer needing to check pub byte array for them
-            Set<Certificate> allowedCerts = new HashSet<>();
-
-            while (e.hasMoreElements()) {
-                JarEntry je = e.nextElement();
-                String name = je.getName();
-                if (je.isDirectory() || signatureRelated(name)) continue;
-
-                Boolean signed = checkCertificates(je.getCertificates(), allowedCerts);
-                if (signed == null || !signed) throw new SecurityException("Verifier not properly signed");
-            }
-        } catch (Exception e) {
-            throw new SecurityException("Failed to check verifier signature", e);
-        }
-    }
-
-    public static AuthAPI getAuthApi() {
-        AuthAPI instance = AuthAPI.getInstance();
+    public static void verifyAuthApi(AuthAPI instance) {
         try (JarFile jf = new JarFile(findPathJar(instance.getClass()), true)) {
             Vector<JarEntry> entriesVec = new Vector<>();
             byte[] buffer = new byte[8192];
@@ -113,7 +68,6 @@ public class VerifierChecker {
         } catch (Exception e) {
             throw new SecurityException("Failed to check verifier signature", e);
         }
-        return instance;
     }
 
     private static Boolean checkCertificates(Certificate[] certs, Set<Certificate> allowedCerts) {
