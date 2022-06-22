@@ -8,11 +8,11 @@ public class PalladiumStatsConfig implements SimpleStatsConfig {
 
     public boolean STOP;
 
-    @Number(min = 1, max = 120, step = 1)
+    @Number(min = 5, max = 60, step = 5)
     public int REFRESH_RATE_S;
 
     public PalladiumStatsConfig() {
-        this.REFRESH_RATE_S = 1;
+        this.REFRESH_RATE_S = 5;
         this.STOP = false;
     }
 

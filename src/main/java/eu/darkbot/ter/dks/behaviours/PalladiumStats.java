@@ -36,8 +36,10 @@ public class PalladiumStats extends SimpleStats<PalladiumStatsConfig> implements
     @Override
     protected String getStatusMessageForLabel() {
         String status = this.isFirstTick ?
-                this.i18n.get(this.plugin, "palladium_stats.status.ready") :
-                this.i18n.get(this.plugin, "palladium_stats.status.waiting");
+                this.i18n.get(this.plugin, "palladium_stats.status.initializing") :
+                this.config.getStop() ?
+                    this.i18n.get(this.plugin, "palladium_stats.status.stopped") :
+                    this.i18n.get(this.plugin, "palladium_stats.status.waiting");
         String time = "-";
         String collected = "-";
         String hour = "-";

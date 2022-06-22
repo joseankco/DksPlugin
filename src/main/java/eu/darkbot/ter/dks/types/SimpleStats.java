@@ -11,7 +11,6 @@ import eu.darkbot.util.Popups;
 
 import javax.swing.*;
 import java.awt.*;
-import java.text.DecimalFormat;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collection;
@@ -23,6 +22,7 @@ public abstract class SimpleStats<T extends SimpleStatsConfig> implements Behavi
     protected final I18nAPI i18n;
     protected final ExtensionsAPI extensions;
     protected final PluginInfo plugin;
+    protected final int TIME_TO_SAFE_INIT_S = 5;
 
     protected T config;
 
@@ -48,6 +48,9 @@ public abstract class SimpleStats<T extends SimpleStatsConfig> implements Behavi
         this.i18n = i18n;
         this.extensions = extensions;
         this.plugin = Objects.requireNonNull(this.extensions.getFeatureInfo(getClass())).getPluginInfo();
+
+        this.lastRefresh = System.currentTimeMillis();
+        this.lastTick = System.currentTimeMillis();
 
         this.statusMessage = new JLabel(this.getStatusMessageForLabel());
     }
@@ -75,21 +78,33 @@ public abstract class SimpleStats<T extends SimpleStatsConfig> implements Behavi
     @Override
     public void onTickBehavior() {
         if (this.isFirstTick) {
-            this.initTask();
-        }
-        if (!this.isStoppedTick) {
-            if (!this.config.getStop()) {
-                if (this.isRunning || runIfPicked()) {
-                    refreshRunningTime();
-                    if (shouldRefreshData()) {
-                        refreshData();
-                    }
-                }
+            if (this.shouldSafeInitData()) {
+                this.initTask();
             }
         } else {
-            this.isStoppedTick = false;
+            if (!this.config.getStop()) {
+                if (!this.isRunning) {
+                    if (this.runIfPicked()) {
+                        this.refreshData();
+                    }
+                }
+                if (this.isRunning) {
+                    this.refreshRunningTime();
+                }
+            }
+            if (this.shouldRefreshData()) {
+                if (!this.isStoppedTick) {
+                    if (!this.config.getStop()) {
+                        if (this.isRunning) {
+                            this.refreshData();
+                        }
+                    }
+                } else {
+                    this.isStoppedTick = false;
+                }
+            }
         }
-        setStatusMessage();
+        this.setStatusMessage();
     }
 
     @Override
@@ -100,6 +115,10 @@ public abstract class SimpleStats<T extends SimpleStatsConfig> implements Behavi
 
     protected boolean shouldRefreshData() {
         return (System.currentTimeMillis() - this.lastRefresh) >= (config.getRefreshRateSec() * 1000L);
+    }
+
+    protected boolean shouldSafeInitData() {
+        return (System.currentTimeMillis() - this.lastTick) >= (this.TIME_TO_SAFE_INIT_S * 1000L);
     }
 
     protected void refreshData() {
@@ -122,17 +141,23 @@ public abstract class SimpleStats<T extends SimpleStatsConfig> implements Behavi
                 this.lastTick = now;
                 this.isRunning = true;
             }
-            this.refreshData();
         }
         return this.isRunning;
     }
 
+    protected void resetTask() {
+        this.initTask();
+        this.isFirstTick = true;
+    }
+
     protected void initTask() {
         this.isRunning = false;
-        setStatusMessage();
-        this.prevAmount = this.isStoppedTick ? Integer.MAX_VALUE : this.getCurrentAmount();
+        this.setStatusMessage();
+        this.prevAmount = this.getCurrentAmount();
         this.totalCollected = 0;
         this.collectedPerHour = 0;
+        this.lastTick = System.currentTimeMillis();
+        this.isStoppedTick = false;
         this.isFirstTick = false;
     }
 
@@ -171,7 +196,7 @@ public abstract class SimpleStats<T extends SimpleStatsConfig> implements Behavi
 
     protected JButton getResetButton() {
         JButton reset = new JButton(this.i18n.get(this.plugin, "buttons.reset_stats"));
-        reset.addActionListener(e -> this.initTask());
+        reset.addActionListener(e -> this.resetTask());
         return reset;
     }
 
