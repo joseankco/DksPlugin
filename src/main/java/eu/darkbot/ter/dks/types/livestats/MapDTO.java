@@ -3,6 +3,7 @@ package eu.darkbot.ter.dks.types.livestats;
 import eu.darkbot.api.game.entities.Npc;
 import eu.darkbot.api.game.entities.Player;
 import eu.darkbot.api.game.entities.Portal;
+import eu.darkbot.api.game.entities.Station;
 import eu.darkbot.api.game.other.GameMap;
 import eu.darkbot.api.managers.EntitiesAPI;
 import eu.darkbot.api.managers.StarSystemAPI;
@@ -24,7 +25,6 @@ public class MapDTO {
         this.mapID = String.valueOf(current.getId());
         this.boundX = map.getCurrentMapBounds().getX2();
         this.boundY = map.getCurrentMapBounds().getY2();
-        System.out.println(entities.getPortals());
         portals = new ArrayList<>();
         npcs = new ArrayList<>();
         players = new ArrayList<>();
@@ -48,10 +48,12 @@ public class MapDTO {
         private Double x;
         private Double y;
         private String name;
+        private boolean isEnemy;
         public PlayerDTO(Player player) {
             this.x = player.getX();
             this.y = player.getY();
             this.name = player.getEntityInfo().getUsername();
+            this.isEnemy = player.getEntityInfo().isEnemy();
         }
     }
 

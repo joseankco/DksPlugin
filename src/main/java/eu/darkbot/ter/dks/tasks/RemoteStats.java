@@ -6,14 +6,14 @@ import eu.darkbot.api.extensions.Feature;
 import eu.darkbot.api.extensions.Task;
 import eu.darkbot.api.managers.*;
 import eu.darkbot.ter.dks.types.VerifierChecker;
-import eu.darkbot.ter.dks.types.config.LiveStatsConfig;
+import eu.darkbot.ter.dks.types.config.RemoteStatsConfig;
 import eu.darkbot.ter.dks.types.livestats.*;
 import eu.darkbot.ter.dks.types.utils.Http;
 
 import java.util.Arrays;
 
-@Feature(name = "Live Stats", description = "Send live stats thru Sockets")
-public class LiveStats implements Task, Configurable<LiveStatsConfig> {
+@Feature(name = "Remote Stats", description = "Sends hero stats to a Server")
+public class RemoteStats implements Task, Configurable<RemoteStatsConfig> {
 
     protected final HeroAPI heroAPI;
     protected final StarSystemAPI mapAPI;
@@ -21,11 +21,11 @@ public class LiveStats implements Task, Configurable<LiveStatsConfig> {
     protected final StatsAPI statsAPI;
     protected final EntitiesAPI entitiesAPI;
 
-    private LiveStatsConfig config;
+    private RemoteStatsConfig config;
 
     private long nextTick = 0;
 
-    public LiveStats(
+    public RemoteStats(
             AuthAPI auth,
             HeroAPI hero,
             StarSystemAPI map,
@@ -80,7 +80,7 @@ public class LiveStats implements Task, Configurable<LiveStatsConfig> {
     }
 
     @Override
-    public void setConfig(ConfigSetting<LiveStatsConfig> arg0) {
+    public void setConfig(ConfigSetting<RemoteStatsConfig> arg0) {
         this.config = arg0.getValue();
     }
 }

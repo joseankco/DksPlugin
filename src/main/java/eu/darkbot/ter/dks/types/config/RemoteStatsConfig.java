@@ -3,8 +3,8 @@ package eu.darkbot.ter.dks.types.config;
 import eu.darkbot.api.config.annotations.Configuration;
 import eu.darkbot.api.config.annotations.Number;
 
-@Configuration("live_stats")
-public class LiveStatsConfig {
+@Configuration("remote_stats")
+public class RemoteStatsConfig {
 
     public boolean ACTIVE = false;
 
