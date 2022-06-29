@@ -1,9 +1,8 @@
-package eu.darkbot.ter.dks.types.livestats;
+package eu.darkbot.ter.dks.types.remotestats;
 
 import eu.darkbot.api.game.entities.Npc;
 import eu.darkbot.api.game.entities.Player;
 import eu.darkbot.api.game.entities.Portal;
-import eu.darkbot.api.game.entities.Station;
 import eu.darkbot.api.game.other.GameMap;
 import eu.darkbot.api.managers.EntitiesAPI;
 import eu.darkbot.api.managers.StarSystemAPI;

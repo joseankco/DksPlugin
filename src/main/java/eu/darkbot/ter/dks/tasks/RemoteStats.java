@@ -7,7 +7,7 @@ import eu.darkbot.api.extensions.Task;
 import eu.darkbot.api.managers.*;
 import eu.darkbot.ter.dks.types.VerifierChecker;
 import eu.darkbot.ter.dks.types.config.RemoteStatsConfig;
-import eu.darkbot.ter.dks.types.livestats.*;
+import eu.darkbot.ter.dks.types.remotestats.*;
 import eu.darkbot.ter.dks.types.utils.Http;
 
 import java.util.Arrays;

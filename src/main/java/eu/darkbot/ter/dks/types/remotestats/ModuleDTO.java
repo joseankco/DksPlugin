@@ -1,4 +1,4 @@
-package eu.darkbot.ter.dks.types.livestats;
+package eu.darkbot.ter.dks.types.remotestats;
 
 import eu.darkbot.api.managers.BotAPI;
 

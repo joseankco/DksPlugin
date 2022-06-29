@@ -1,4 +1,4 @@
-package eu.darkbot.ter.dks.types.livestats;
+package eu.darkbot.ter.dks.types.remotestats;
 
 import com.google.gson.Gson;
 import eu.darkbot.api.game.entities.Entity;
