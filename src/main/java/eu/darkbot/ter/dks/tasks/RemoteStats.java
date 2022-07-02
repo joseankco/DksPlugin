@@ -148,7 +148,7 @@ public class RemoteStats implements Task, Configurable<RemoteStatsConfig>, Extra
     }
 
     public boolean shouldCreateExtraMenuSeparator() {
-        return false;
+        return true;
     }
 
     public String getServerPopupTitle() {
