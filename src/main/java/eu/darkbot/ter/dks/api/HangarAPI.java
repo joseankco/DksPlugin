@@ -23,26 +23,46 @@ public class HangarAPI {
     protected List<EquippableItem> equippableItems;
     protected List<ItemInfo> itemInfos;
     protected Map<String, HeroItem> items;
+    protected long lastUpdate = 0L;
+    protected long UPDATE_MINIMUM_SECONDS = 5000L;
 
     public HangarAPI (final @NotNull Main main) {
         this.hangar = main.backpage.hangarManager;
         this.items = new HashMap<>();
     }
 
+    public HangarAPI (final @NotNull Main main, final long updateSeconds) {
+        this.hangar = main.backpage.hangarManager;
+        this.items = new HashMap<>();
+        this.UPDATE_MINIMUM_SECONDS = updateSeconds;
+    }
+
+    public boolean shouldUpdate() {
+        long now = System.currentTimeMillis();
+        return now - this.lastUpdate > UPDATE_MINIMUM_SECONDS;
+    }
+
     public boolean updateCurrentHangar() {
         try {
-            this.hangar.updateCurrentHangar();
-            this.currentHangar = this.hangar.getCurrentHangar();
-            this.hangars = this.currentHangar.getData().getRet().getHangars();
-            this.equippableItems = this.currentHangar.getData().getRet().getItems();
-            this.itemInfos = this.currentHangar.getData().getRet().getItemInfos();
-            for (ItemInfo item : this.itemInfos) {
-                this.items.put(item.getLocalizationId(), new HeroItem(this.getEquippableItemFromItemInfo(item), item));
+            if (!this.hasAnyData() || this.shouldUpdate()) {
+                this.hangar.updateCurrentHangar();
+                this.currentHangar = this.hangar.getCurrentHangar();
+                this.hangars = this.currentHangar.getData().getRet().getHangars();
+                this.equippableItems = this.currentHangar.getData().getRet().getItems();
+                this.itemInfos = this.currentHangar.getData().getRet().getItemInfos();
+                for (ItemInfo item : this.itemInfos) {
+                    this.items.put(item.getLocalizationId(), new HeroItem(this.getEquippableItemFromItemInfo(item), item));
+                }
+                this.lastUpdate = System.currentTimeMillis();
             }
             return true;
         } catch (Exception e) {
             return false;
         }
+    }
+
+    public long getLastUpdate() {
+        return this.lastUpdate;
     }
 
     public boolean hasAnyData() {

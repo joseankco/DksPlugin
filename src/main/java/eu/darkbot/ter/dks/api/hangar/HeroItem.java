@@ -70,4 +70,12 @@ public class HeroItem {
     public int getDamageLevel() {
         return this.item.getDamageLevel();
     }
+
+    public EquippableItem getEquippableItem() {
+        return this.item;
+    }
+
+    public ItemInfo getItemInfo() {
+        return info;
+    }
 }
