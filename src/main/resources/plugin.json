@@ -6,7 +6,8 @@
   "supportedVersion": "1.13.17 beta 106",
   "basePackage": "eu.darkbot.ter.dks",
   "features": [
-    "eu.darkbot.ter.dks.tasks.RemoteStats"
+    "eu.darkbot.ter.dks.tasks.RemoteStats",
+    "eu.darkbot.ter.dks.behaviours.PalladiumStats"
   ],
   "donation" : "https://www.paypal.me/joseankco",
   "download": "https://github.com/joseankco/DksPluginReleases/releases/download/1.2.0/DksPlugin.jar",
