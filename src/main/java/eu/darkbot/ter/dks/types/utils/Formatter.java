@@ -2,6 +2,7 @@ package eu.darkbot.ter.dks.types.utils;
 
 import java.text.DecimalFormat;
 import java.time.Duration;
+import java.util.List;
 
 public class Formatter {
     public static String formatDuration(Duration duration) {
@@ -20,5 +21,13 @@ public class Formatter {
 
     public static String formatBoldTag(String inner) {
         return String.format("<b>%s</b>", inner);
+    }
+
+    public static String joinList(List<String> list, String delimiter) {
+        StringBuilder sb = new StringBuilder();
+        for(String line: list) {
+            sb.append(line).append(delimiter);
+        }
+        return sb.toString();
     }
 }
