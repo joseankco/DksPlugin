@@ -199,7 +199,14 @@ public class LogScrapper implements Task, ExtraMenus, Configurable<LogScrapperCo
     }
 
     public boolean shouldCreateExtraMenuSeparator() {
-        return !Objects.requireNonNull(this.main.featureRegistry.getFeatureDefinition("eu.darkbot.ter.dks.tasks.LiveLogs")).isEnabled();
+        String[] precessors = new String[] {
+                "eu.darkbot.ter.dks.tasks.RemoteStats",
+                "eu.darkbot.ter.dks.tasks.LiveLogs",
+        };
+        String enabled = Arrays.stream(precessors).sequential().filter(f ->
+                Objects.requireNonNull(this.main.featureRegistry.getFeatureDefinition(f)).isEnabled()
+        ).findFirst().orElse(null);
+        return enabled == null;
     }
 
     protected void refreshRunningTime() {

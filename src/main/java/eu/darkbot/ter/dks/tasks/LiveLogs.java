@@ -124,7 +124,13 @@ public class LiveLogs implements Task, ExtraMenus, Configurable<LiveLogsConfig> 
     }
 
     public boolean shouldCreateExtraMenuSeparator() {
-        return !Objects.requireNonNull(this.main.featureRegistry.getFeatureDefinition("eu.darkbot.ter.dks.tasks.RemoteStats")).isEnabled();
+        String[] precessors = new String[] {
+                "eu.darkbot.ter.dks.tasks.RemoteStats"
+        };
+        String enabled = Arrays.stream(precessors).sequential().filter(f ->
+                Objects.requireNonNull(this.main.featureRegistry.getFeatureDefinition(f)).isEnabled()
+        ).findFirst().orElse(null);
+        return enabled == null;
     }
 
     @Override
