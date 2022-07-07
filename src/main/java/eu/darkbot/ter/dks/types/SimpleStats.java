@@ -1,8 +1,10 @@
 package eu.darkbot.ter.dks.types;
 
+import com.github.manolo8.darkbot.Main;
 import eu.darkbot.api.extensions.*;
 import eu.darkbot.api.managers.ExtensionsAPI;
 import eu.darkbot.api.managers.I18nAPI;
+import eu.darkbot.ter.dks.api.HangarAPI;
 import eu.darkbot.ter.dks.types.config.SimpleStatsConfig;
 import eu.darkbot.api.PluginAPI;
 import eu.darkbot.api.config.ConfigSetting;
@@ -12,6 +14,7 @@ import eu.darkbot.util.Popups;
 import javax.swing.*;
 import java.awt.*;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Objects;
@@ -33,13 +36,16 @@ public abstract class SimpleStats<T extends SimpleStatsConfig> implements Behavi
     protected boolean isStoppedTick = false;
 
     protected Duration runningTime = Duration.ofSeconds(0);
-    protected double prevAmount;
+    protected Integer prevAmount;
     protected double totalCollected = 0;
     protected double collectedPerHour = 0;
 
     protected final JLabel statusMessage;
 
-    public SimpleStats(PluginAPI api, AuthAPI auth, I18nAPI i18n, ExtensionsAPI extensions) {
+    protected Main main;
+    protected HangarAPI hangar;
+
+    public SimpleStats(PluginAPI api, AuthAPI auth, I18nAPI i18n, ExtensionsAPI extensions, Main main) {
         if (!Arrays.equals(VerifierChecker.class.getSigners(), getClass().getSigners()))
             throw new SecurityException();
         VerifierChecker.checkAuthenticity(auth);
@@ -48,6 +54,10 @@ public abstract class SimpleStats<T extends SimpleStatsConfig> implements Behavi
         this.i18n = i18n;
         this.extensions = extensions;
         this.plugin = Objects.requireNonNull(this.extensions.getFeatureInfo(getClass())).getPluginInfo();
+
+        this.main = main;
+        this.hangar = new HangarAPI(main);
+        this.hangar.updateCurrentHangar();
 
         this.lastRefresh = System.currentTimeMillis();
         this.lastTick = System.currentTimeMillis();
@@ -62,14 +72,16 @@ public abstract class SimpleStats<T extends SimpleStatsConfig> implements Behavi
 
     @Override
     public Collection<JComponent> getExtraMenuItems(PluginAPI api) {
-        return Arrays.asList(
-                this.shouldCreateExtraMenuSeparator() ? createSeparator(this.i18n.get(this.plugin, "plugin.separator")) : null,
-                create(this.getPopupTitle(), e -> this.showStatusPopup())
-        );
+        Collection<JComponent> components = new ArrayList<>();
+        if (this.shouldCreateExtraMenuSeparator()) {
+            components.add(createSeparator(this.i18n.get(this.plugin, "plugin.separator")));
+        }
+        components.add(create(this.getPopupTitle(), e -> this.showStatusPopup()));
+        return components;
     }
 
     /* ABSTRACT METHODS */
-    protected abstract int getCurrentAmount();
+    protected abstract Integer getCurrentAmount();
     protected abstract String getStatusMessageForLabel();
     protected abstract String getPopupTitle();
     protected abstract boolean shouldCreateExtraMenuSeparator();
@@ -78,32 +90,18 @@ public abstract class SimpleStats<T extends SimpleStatsConfig> implements Behavi
     @Override
     public void onTickBehavior() {
         if (this.isFirstTick) {
-            if (this.shouldSafeInitData()) {
-                this.initTask();
-            }
+            this.initTask();
         } else {
             if (!this.config.getStop()) {
-                if (!this.isRunning) {
-                    if (this.runIfPicked()) {
+                if (this.isRunningOrElseTryRun()) {
+                    this.refreshRunningTime();
+                    if (this.shouldRefreshData()) {
                         this.refreshData();
                     }
                 }
-                if (this.isRunning) {
-                    this.refreshRunningTime();
-                }
-            }
-            if (this.shouldRefreshData()) {
-                if (!this.isStoppedTick) {
-                    if (!this.config.getStop()) {
-                        if (this.isRunning) {
-                            this.refreshData();
-                        }
-                    }
-                } else {
-                    this.isStoppedTick = false;
-                }
             }
         }
+        this.isStoppedTick = false;
         this.setStatusMessage();
     }
 
@@ -117,24 +115,22 @@ public abstract class SimpleStats<T extends SimpleStatsConfig> implements Behavi
         return (System.currentTimeMillis() - this.lastRefresh) >= (config.getRefreshRateSec() * 1000L);
     }
 
-    protected boolean shouldSafeInitData() {
-        return (System.currentTimeMillis() - this.lastTick) >= (this.TIME_TO_SAFE_INIT_S * 1000L);
-    }
-
     protected void refreshData() {
-        int currentAmount = getCurrentAmount();
-        if (currentAmount > this.prevAmount) {
-            this.totalCollected = this.totalCollected + (currentAmount - this.prevAmount);
+        Integer currentAmount = this.getCurrentAmount();
+        if (currentAmount != null) {
+            if (currentAmount > this.prevAmount) {
+                this.totalCollected = this.totalCollected + (currentAmount - this.prevAmount);
+            }
+            this.prevAmount = currentAmount;
+            this.collectedPerHour = (this.totalCollected / ((double) this.runningTime.getSeconds())) * 3600;
+            this.lastRefresh = System.currentTimeMillis();
         }
-        this.prevAmount = currentAmount;
-        this.collectedPerHour = (this.totalCollected / ((double) this.runningTime.getSeconds())) * 3600;
-        this.lastRefresh = System.currentTimeMillis();
     }
 
-    protected boolean runIfPicked() {
-        int currentAmount = getCurrentAmount();
-        if (currentAmount != this.prevAmount) {
-            if (currentAmount > this.prevAmount) {
+    protected boolean isRunningOrElseTryRun() {
+        if (!this.isRunning) {
+            Integer currentAmount = this.getCurrentAmount();
+            if (currentAmount != null && currentAmount > this.prevAmount) {
                 long now = System.currentTimeMillis();
                 this.runningTime = Duration.ofSeconds(0);
                 this.lastRefresh = now;
@@ -146,7 +142,6 @@ public abstract class SimpleStats<T extends SimpleStatsConfig> implements Behavi
     }
 
     protected void resetTask() {
-        this.initTask();
         this.isFirstTick = true;
     }
 
@@ -154,11 +149,13 @@ public abstract class SimpleStats<T extends SimpleStatsConfig> implements Behavi
         this.isRunning = false;
         this.setStatusMessage();
         this.prevAmount = this.getCurrentAmount();
-        this.totalCollected = 0;
-        this.collectedPerHour = 0;
-        this.lastTick = System.currentTimeMillis();
-        this.isStoppedTick = false;
-        this.isFirstTick = false;
+        if (this.prevAmount != null) {
+            this.totalCollected = 0;
+            this.collectedPerHour = 0;
+            this.lastTick = System.currentTimeMillis();
+            this.isStoppedTick = false;
+            this.isFirstTick = false;
+        }
     }
 
     protected void refreshRunningTime() {
