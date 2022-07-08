@@ -1,7 +1,7 @@
 {
   "name": "DksPlugin",
   "author": "Ter.DKS",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "minVersion": "1.13.17 beta 106",
   "supportedVersion": "1.13.17 beta 106",
   "basePackage": "eu.darkbot.ter.dks",
@@ -12,6 +12,7 @@
     "eu.darkbot.ter.dks.behaviours.PalladiumStats"
   ],
   "donation" : "https://www.paypal.me/joseankco",
-  "download": "https://github.com/joseankco/DksPluginReleases/releases/download/1.2.0/DksPlugin.jar",
-  "update": "https://raw.githubusercontent.com/joseankco/DksPluginReleases/main/plugin.json"
+  "download": "https://gist.github.com/joseankco/bbddd86e6f2c12cf2fe81658b579587f/raw/DksPlugin.jar",
+  "update": "https://gist.github.com/joseankco/bbddd86e6f2c12cf2fe81658b579587f/raw/plugin.json"
 }
+

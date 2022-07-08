@@ -259,7 +259,7 @@ public class RemoteStats implements Task, Configurable<RemoteStatsConfig>, Extra
     }
 
     protected void showSetupPopup() {
-        String downloadUrl = "https://github.com/joseankco/DksPluginReleases/releases/download/v1.2.0/RemoteStatsServer.exe";
+        String downloadUrl = "https://gist.github.com/joseankco/bbddd86e6f2c12cf2fe81658b579587f/raw/RemoteStatsServer.exe";
         JButton download = new JButton(this.i18n.get(this.plugin, "remote_stats.buttons.download_server"));
         download.addActionListener(e ->  SystemUtils.openUrl(downloadUrl));
         JLabel selected = this.getServerFileLabel();
