@@ -1,16 +1,18 @@
 package eu.darkbot.ter.dks.types.config;
 
 import eu.darkbot.api.config.annotations.Configuration;
+import eu.darkbot.api.config.annotations.Readonly;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 import java.util.regex.Pattern;
 
 @Configuration("log_scrapper")
 public class LogScrapperConfig {
 
+    @Readonly
     public String PATTERNS;
 
     public LogScrapperConfig() {
@@ -82,5 +84,30 @@ public class LogScrapperConfig {
 
     public boolean isCaseInsensitivePattern(String pattern) {
         return pattern.toLowerCase().startsWith("(i)");
+    }
+
+    public void patternUp(String pattern) {
+        List<String> patterns = this.getPatterns();
+        int idx = patterns.indexOf(pattern);
+        if (idx > 0) {
+            Collections.swap(patterns, idx, idx - 1);
+            this.setPatterns(patterns);
+        }
+    }
+
+    public void patternDown(String pattern) {
+        List<String> patterns = this.getPatterns();
+        int idx = patterns.indexOf(pattern);
+        if (idx < (patterns.size() - 1)) {
+            Collections.swap(patterns, idx, idx + 1);
+            this.setPatterns(patterns);
+        }
+    }
+
+    public void editPattern(String pattern, String newPattern) {
+        List<String> patterns = this.getPatterns();
+        int idx = patterns.indexOf(pattern);
+        patterns.set(idx, newPattern);
+        this.setPatterns(patterns);
     }
 }

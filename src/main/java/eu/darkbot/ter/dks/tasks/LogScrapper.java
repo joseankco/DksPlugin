@@ -106,7 +106,7 @@ public class LogScrapper implements Task, ExtraMenus, Configurable<LogScrapperCo
                 this.refreshUi(true);
             }
         });
-        add.setPreferredSize(new Dimension(100, 25));
+        add.setPreferredSize(new Dimension(80, 25));
         return add;
     }
 
@@ -116,8 +116,43 @@ public class LogScrapper implements Task, ExtraMenus, Configurable<LogScrapperCo
             this.config.removePattern(pattern);
             this.refreshUi(true);
         });
-        delete.setPreferredSize(new Dimension(100, 25));
+        delete.setPreferredSize(new Dimension(80, 25));
         return delete;
+    }
+
+    public JButton getEditPatternButton(String pattern, JTextField text) {
+        JButton edit = new JButton(this.i18n.get(this.plugin, "log_scrapper.buttons.edit"));
+        edit.addActionListener(e -> {
+            String newPattern = text.getText().trim();
+            if (!newPattern.equals("")) {
+                this.config.editPattern(pattern, newPattern);
+                this.refreshUi(true);
+            }
+        });
+        edit.setPreferredSize(new Dimension(80, 25));
+        return edit;
+    }
+
+    public JButton getUpPatternButton(String pattern) {
+        // JButton up = new JButton(this.i18n.get(this.plugin, "log_scrapper.buttons.up"));
+        JButton up = new JButton("^");
+        up.addActionListener(e -> {
+            this.config.patternUp(pattern);
+            this.refreshUi(true);
+        });
+        up.setPreferredSize(new Dimension(30, 25));
+        return up;
+    }
+
+    public JButton getDownPatternButton(String pattern) {
+        // JButton down = new JButton(this.i18n.get(this.plugin, "log_scrapper.buttons.down"));
+        JButton down = new JButton("v");
+        down.addActionListener(e -> {
+            this.config.patternDown(pattern);
+            this.refreshUi(true);
+        });
+        down.setPreferredSize(new Dimension(30, 25));
+        return down;
     }
 
     public JPanel getCombinedPanel(Component a, Component b) {
@@ -133,17 +168,26 @@ public class LogScrapper implements Task, ExtraMenus, Configurable<LogScrapperCo
         this.managePanel.removeAll();
 
         JTextField text = new JTextField();
-        text.setPreferredSize(new Dimension(650, 25));
+        text.setPreferredSize(new Dimension(600, 25));
         JButton add = this.getAddPatternButton(text);
 
         JPanel addPatternPanel = this.getCombinedPanel(text, add);
         this.managePanel.add(addPatternPanel);
 
         for (String pattern : patterns) {
+            JTextField patternField = new JTextField(pattern);
+            patternField.setPreferredSize(new Dimension(500, 25));
+
             JButton delete = this.getDeletePatternButton(pattern);
-            JLabel patternLabel = new JLabel(pattern);
-            patternLabel.setPreferredSize(new Dimension(650, 30));
-            JPanel patternPanel = this.getCombinedPanel(patternLabel, delete);
+            JButton edit = this.getEditPatternButton(pattern, patternField);
+            JPanel delEditPanel = this.getCombinedPanel(edit, delete);
+
+            JButton up = this.getUpPatternButton(pattern);
+            JButton down = this.getDownPatternButton(pattern);
+            JPanel movePanel = this.getCombinedPanel(up, down);
+
+            JPanel actionPanel = this.getCombinedPanel(movePanel, delEditPanel);
+            JPanel patternPanel = this.getCombinedPanel(patternField, actionPanel);
             this.managePanel.add(patternPanel);
         }
         this.manageScroll.repaint();
