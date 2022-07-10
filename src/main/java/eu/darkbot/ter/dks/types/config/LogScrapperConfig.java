@@ -27,13 +27,7 @@ public class LogScrapperConfig {
 
     public void removePattern(String toDeletePattern) {
         List<String> patterns = this.getPatterns();
-        int idx = -1;
-        for (int i = 0; i < patterns.size(); i++) {
-            String pattern = patterns.get(i);
-            if (pattern.equals(toDeletePattern)) {
-                idx = i;
-            }
-        }
+        int idx = patterns.indexOf(toDeletePattern);
         if (idx != -1) {
             patterns.remove(idx);
         }
