@@ -9,6 +9,7 @@ import eu.darkbot.ter.dks.types.config.SimpleStatsConfig;
 import eu.darkbot.api.PluginAPI;
 import eu.darkbot.api.config.ConfigSetting;
 import eu.darkbot.api.managers.AuthAPI;
+import eu.darkbot.ter.dks.utils.VerifierChecker;
 import eu.darkbot.util.Popups;
 
 import javax.swing.*;

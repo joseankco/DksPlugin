@@ -1,4 +1,4 @@
-package eu.darkbot.ter.dks.types.utils;
+package eu.darkbot.ter.dks.utils;
 
 import java.text.DecimalFormat;
 import java.time.Duration;

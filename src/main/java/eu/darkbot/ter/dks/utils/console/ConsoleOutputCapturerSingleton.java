@@ -1,4 +1,4 @@
-package eu.darkbot.ter.dks.types.utils.console;
+package eu.darkbot.ter.dks.utils.console;
 
 public class ConsoleOutputCapturerSingleton {
 

@@ -5,11 +5,10 @@ import eu.darkbot.api.PluginAPI;
 import eu.darkbot.api.config.ConfigSetting;
 import eu.darkbot.api.extensions.*;
 import eu.darkbot.api.managers.*;
-import eu.darkbot.ter.dks.types.VerifierChecker;
+import eu.darkbot.ter.dks.utils.VerifierChecker;
 import eu.darkbot.ter.dks.types.config.LiveLogsConfig;
-import eu.darkbot.ter.dks.types.utils.Formatter;
-import eu.darkbot.ter.dks.types.utils.console.ConsoleOutputCapturer;
-import eu.darkbot.ter.dks.types.utils.console.ConsoleOutputCapturerSingleton;
+import eu.darkbot.ter.dks.utils.console.ConsoleOutputCapturer;
+import eu.darkbot.ter.dks.utils.console.ConsoleOutputCapturerSingleton;
 import eu.darkbot.util.Popups;
 
 import javax.swing.*;

@@ -1,4 +1,4 @@
-package eu.darkbot.ter.dks.types.utils;
+package eu.darkbot.ter.dks.utils;
 
 import java.io.OutputStream;
 import java.net.HttpURLConnection;

@@ -7,11 +7,11 @@ import eu.darkbot.api.extensions.*;
 import eu.darkbot.api.managers.AuthAPI;
 import eu.darkbot.api.managers.ExtensionsAPI;
 import eu.darkbot.api.managers.I18nAPI;
-import eu.darkbot.ter.dks.types.VerifierChecker;
+import eu.darkbot.ter.dks.utils.VerifierChecker;
 import eu.darkbot.ter.dks.types.config.LogScrapperConfig;
-import eu.darkbot.ter.dks.types.utils.Formatter;
-import eu.darkbot.ter.dks.types.utils.console.ConsoleOutputCapturer;
-import eu.darkbot.ter.dks.types.utils.console.ConsoleOutputCapturerSingleton;
+import eu.darkbot.ter.dks.utils.Formatter;
+import eu.darkbot.ter.dks.utils.console.ConsoleOutputCapturer;
+import eu.darkbot.ter.dks.utils.console.ConsoleOutputCapturerSingleton;
 import eu.darkbot.util.Popups;
 import eu.darkbot.util.SystemUtils;
 

@@ -1,14 +1,13 @@
 package eu.darkbot.ter.dks.behaviours;
 
 import com.github.manolo8.darkbot.Main;
-import eu.darkbot.ter.dks.api.HangarAPI;
 import eu.darkbot.ter.dks.api.hangar.LocalizationID;
 import eu.darkbot.ter.dks.types.SimpleStats;
 import eu.darkbot.ter.dks.types.config.PalladiumStatsConfig;
 import eu.darkbot.api.PluginAPI;
 import eu.darkbot.api.extensions.*;
 import eu.darkbot.api.managers.*;
-import eu.darkbot.ter.dks.types.utils.Formatter;
+import eu.darkbot.ter.dks.utils.Formatter;
 
 import java.util.Arrays;
 import java.util.Objects;

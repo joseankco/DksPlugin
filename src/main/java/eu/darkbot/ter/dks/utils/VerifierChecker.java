@@ -1,4 +1,4 @@
-package eu.darkbot.ter.dks.types;
+package eu.darkbot.ter.dks.utils;
 
 import eu.darkbot.api.managers.AuthAPI;
 
