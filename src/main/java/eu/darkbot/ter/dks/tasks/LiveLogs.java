@@ -32,6 +32,9 @@ public class LiveLogs implements Task, ExtraMenus, Configurable<LiveLogsConfig> 
     protected JScrollPane scrollSysOut;
     protected JTextArea textSysOut;
 
+    protected JPanel panelFilterStd;
+    protected JTextField filterStd;
+
     protected JScrollPane scrollSysErr;
     protected JTextArea textSysErr;
     protected JTabbedPane tabs;
@@ -63,14 +66,23 @@ public class LiveLogs implements Task, ExtraMenus, Configurable<LiveLogsConfig> 
 
         this.capturer.start();
 
+        this.panelFilterStd = new JPanel();
+        this.panelFilterStd.setLayout(new BoxLayout(this.panelFilterStd, BoxLayout.Y_AXIS));
+        this.filterStd = new JTextField();
+        this.filterStd.addActionListener(e -> this.setCapturersLines());
+
         this.textSysOut = this.getTextArea(50, 15,false);
-        this.scrollSysOut = new JScrollPane(this.textSysOut);
+        this.scrollSysOut = new JScrollPane(this.panelFilterStd);
+
+        this.panelFilterStd.add(this.filterStd);
+        this.panelFilterStd.add(this.textSysOut);
 
         this.textSysErr = this.getTextArea(50, 15, true);
         this.scrollSysErr = new JScrollPane(this.textSysErr);
 
         this.tabs.add(this.i18n.get(this.plugin, "live_logs.lines.std"), this.scrollSysOut);
         this.tabs.add(this.i18n.get(this.plugin, "live_logs.lines.err"), this.scrollSysErr);
+        tabs.setPreferredSize(new Dimension(700, 300));
     }
 
     public JTextArea getTextArea(int cols, int rows, boolean isError) {
@@ -149,7 +161,8 @@ public class LiveLogs implements Task, ExtraMenus, Configurable<LiveLogsConfig> 
     }
 
     public void setCapturersLines() {
-        this.textSysOut.setText(this.capturer.getLinesStringStd(true));
+        String filter = !this.filterStd.getText().trim().equals("") ? this.filterStd.getText().trim() : null;
+        this.textSysOut.setText(this.capturer.getLinesStringStd(true, filter));
         this.textSysErr.setText(this.capturer.getLinesStringErr(false));
     }
 

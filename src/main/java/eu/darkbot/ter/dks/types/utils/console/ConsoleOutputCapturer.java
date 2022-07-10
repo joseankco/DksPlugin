@@ -3,6 +3,8 @@ package eu.darkbot.ter.dks.types.utils.console;
 import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class ConsoleOutputCapturer {
 
@@ -143,16 +145,29 @@ public class ConsoleOutputCapturer {
         return lines;
     }
 
-    private String getLinesStringBaos(List<String> linesBaos, List<String> lines_dates, boolean reversed) {
+    private String getLinesStringBaos(List<String> linesBaos, List<String> lines_dates, boolean reversed, String filter) {
         List<String> lines = this.getLinesBaos(linesBaos, reversed);
         StringBuilder sb = new StringBuilder();
         int size = lines.size();
         for (int i = 0; i < size; i++) {
             int idx = reversed ? (size - 1) - i : i;
-            if (this.isTimed) {
-                sb.append(lines_dates.get(idx)).append(" ");
+            String line = linesBaos.get(idx);
+
+            boolean matches = true;
+            if (filter != null) {
+                try {
+                    Pattern pattern = Pattern.compile(filter, Pattern.CASE_INSENSITIVE);
+                    Matcher matcher = pattern.matcher(line);
+                    matches = matcher.find();
+                } catch (Exception ignored) {}
             }
-            sb.append(linesBaos.get(idx)).append("\n");
+
+            if (matches) {
+                if (this.isTimed) {
+                    sb.append(lines_dates.get(idx)).append(" ");
+                }
+                sb.append(line).append("\n");
+            }
         }
         return sb.toString();
     }
@@ -161,8 +176,8 @@ public class ConsoleOutputCapturer {
         return this.getLinesBaos(this.lines_std, reversed);
     }
 
-    public String getLinesStringStd(boolean reversed) {
-        return this.getLinesStringBaos(this.lines_std, this.lines_std_dates, reversed);
+    public String getLinesStringStd(boolean reversed, String filter) {
+        return this.getLinesStringBaos(this.lines_std, this.lines_std_dates, reversed, filter);
     }
 
     public List<String> getLinesErr(boolean reversed) {
@@ -170,6 +185,6 @@ public class ConsoleOutputCapturer {
     }
 
     public String getLinesStringErr(boolean reversed) {
-        return this.getLinesStringBaos(this.lines_err, this.lines_err_dates, reversed);
+        return this.getLinesStringBaos(this.lines_err, this.lines_err_dates, reversed, null);
     }
 }
