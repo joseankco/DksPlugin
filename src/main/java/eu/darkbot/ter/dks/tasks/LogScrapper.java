@@ -7,11 +7,15 @@ import eu.darkbot.api.extensions.*;
 import eu.darkbot.api.managers.AuthAPI;
 import eu.darkbot.api.managers.ExtensionsAPI;
 import eu.darkbot.api.managers.I18nAPI;
+import eu.darkbot.ter.dks.types.plugin.LiveLogsDTO;
+import eu.darkbot.ter.dks.types.plugin.LogScrapperDTO;
 import eu.darkbot.ter.dks.utils.VerifierChecker;
 import eu.darkbot.ter.dks.types.config.LogScrapperConfig;
 import eu.darkbot.ter.dks.utils.Formatter;
 import eu.darkbot.ter.dks.utils.console.ConsoleOutputCapturer;
 import eu.darkbot.ter.dks.utils.console.ConsoleOutputCapturerSingleton;
+import eu.darkbot.ter.dks.utils.plugin.DksPluginInfo;
+import eu.darkbot.ter.dks.utils.plugin.DksPluginSingleton;
 import eu.darkbot.util.Popups;
 import eu.darkbot.util.SystemUtils;
 
@@ -35,6 +39,7 @@ public class LogScrapper implements Task, ExtraMenus, Configurable<LogScrapperCo
     protected Duration runningTime;
     protected long lastTick;
     protected long lastTickUiRefresh;
+    protected DksPluginInfo dksPluginInfo;
 
     protected final ConsoleOutputCapturer capturer;
     protected LogScrapperConfig config;
@@ -68,9 +73,15 @@ public class LogScrapper implements Task, ExtraMenus, Configurable<LogScrapperCo
         this.map = new HashMap<>();
 
         this.initUi();
+        this.initDksPluginInfo();
 
         this.runningTime = Duration.ofSeconds(0);
         this.lastTick = System.currentTimeMillis();
+    }
+
+    public void initDksPluginInfo() {
+        this.dksPluginInfo = DksPluginSingleton.getPluginInfo();
+        this.dksPluginInfo.setLogScrapper(new LogScrapperDTO(this));
     }
 
     public void initUi() {
@@ -263,6 +274,7 @@ public class LogScrapper implements Task, ExtraMenus, Configurable<LogScrapperCo
     public void onTickTask() {
         this.refreshPatternsMap();
         this.refreshUi(false);
+        this.dksPluginInfo.getLogScrapper().refresh();
     }
 
     public void refreshUi(boolean force) {
@@ -424,5 +436,24 @@ public class LogScrapper implements Task, ExtraMenus, Configurable<LogScrapperCo
         panel.add(status).setLocation(0, 1);
         panel.add(patterns).setLocation(0, 2);
         return panel;
+    }
+
+    public HashMap<String, int[]> getPatternsMap() {
+        return this.map;
+    }
+
+    public List<String> getPatterns() {
+        if (this.config != null) {
+            return this.config.getPatterns();
+        }
+        return new ArrayList<>();
+    }
+
+    public LogScrapperConfig getConfig() {
+        return this.config;
+    }
+
+    public Duration getRunningTime() {
+        return this.runningTime;
     }
 }

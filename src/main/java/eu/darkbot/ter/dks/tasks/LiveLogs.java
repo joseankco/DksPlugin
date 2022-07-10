@@ -5,10 +5,13 @@ import eu.darkbot.api.PluginAPI;
 import eu.darkbot.api.config.ConfigSetting;
 import eu.darkbot.api.extensions.*;
 import eu.darkbot.api.managers.*;
+import eu.darkbot.ter.dks.types.plugin.LiveLogsDTO;
 import eu.darkbot.ter.dks.utils.VerifierChecker;
 import eu.darkbot.ter.dks.types.config.LiveLogsConfig;
 import eu.darkbot.ter.dks.utils.console.ConsoleOutputCapturer;
 import eu.darkbot.ter.dks.utils.console.ConsoleOutputCapturerSingleton;
+import eu.darkbot.ter.dks.utils.plugin.DksPluginInfo;
+import eu.darkbot.ter.dks.utils.plugin.DksPluginSingleton;
 import eu.darkbot.util.Popups;
 
 import javax.swing.*;
@@ -26,6 +29,7 @@ public class LiveLogs implements Task, ExtraMenus, Configurable<LiveLogsConfig> 
     protected final PluginInfo plugin;
     protected final Main main;
     protected LiveLogsConfig config;
+    protected DksPluginInfo dksPluginInfo;
 
     protected final ConsoleOutputCapturer capturer;
     protected JScrollPane scrollSysOut;
@@ -54,16 +58,17 @@ public class LiveLogs implements Task, ExtraMenus, Configurable<LiveLogsConfig> 
         this.capturer.setMaxLinesStd(100);
         this.capturer.setMaxLinesErr(100);
         this.initCapturers();
-
-        // TODO: botones para closear los stream
-        // Usar isEnabled FeatureRegistry para ver si esta habilitado otro capturer y si es diferente de SysOut reestablecer a SysOut
+        this.initGui();
+        this.initDksPluginInfo();
     }
 
     public void initCapturers() {
+        this.capturer.start();
+    }
+
+    public void initGui() {
         this.status = new JLabel();
         this.tabs = new JTabbedPane();
-
-        this.capturer.start();
 
         this.panelFilterStd = new JPanel();
         this.panelFilterStd.setLayout(new BoxLayout(this.panelFilterStd, BoxLayout.Y_AXIS));
@@ -82,6 +87,11 @@ public class LiveLogs implements Task, ExtraMenus, Configurable<LiveLogsConfig> 
         this.tabs.add(this.i18n.get(this.plugin, "live_logs.lines.std"), this.scrollSysOut);
         this.tabs.add(this.i18n.get(this.plugin, "live_logs.lines.err"), this.scrollSysErr);
         tabs.setPreferredSize(new Dimension(700, 300));
+    }
+
+    public void initDksPluginInfo() {
+        this.dksPluginInfo = DksPluginSingleton.getPluginInfo();
+        this.dksPluginInfo.setLiveLogs(new LiveLogsDTO(this));
     }
 
     public JTextArea getTextArea(int cols, int rows, boolean isError) {
@@ -152,6 +162,7 @@ public class LiveLogs implements Task, ExtraMenus, Configurable<LiveLogsConfig> 
         this.capturer.setTimed(this.config.TIMED);
         this.capturer.updateLines();
         this.setCapturersLines();
+        this.dksPluginInfo.getLiveLogs().refresh();
     }
 
     @Override
@@ -173,5 +184,9 @@ public class LiveLogs implements Task, ExtraMenus, Configurable<LiveLogsConfig> 
     @Override
     public void setConfig(ConfigSetting<LiveLogsConfig> arg0) {
         this.config = arg0.getValue();
+    }
+
+    public ConsoleOutputCapturer getCapturer() {
+        return this.capturer;
     }
 }

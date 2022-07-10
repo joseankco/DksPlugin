@@ -65,10 +65,11 @@ public class HeroDTO {
                 this.y = target.getY();
                 EntityInfo info = null;
                 Health health = null;
-
+                boolean isNpc = false;
                 if (target instanceof Npc) {
                     info = ((Npc) target).getEntityInfo();
                     health = ((Npc) target).getHealth();
+                    isNpc = true;
                 } else if (target instanceof Ship) {
                     info = ((Ship) target).getEntityInfo();
                     health = ((Ship) target).getHealth();
@@ -76,7 +77,7 @@ public class HeroDTO {
 
                 this.isValid = info != null && health != null;
                 if (this.isValid) {
-                    this.isEnemy = info.isEnemy();
+                    this.isEnemy = isNpc || info.isEnemy();
                     this.name = info.getUsername();
                     this.hp = health.getHp();
                     this.shield = health.getShield();

@@ -7,7 +7,11 @@ import eu.darkbot.ter.dks.types.config.PalladiumStatsConfig;
 import eu.darkbot.api.PluginAPI;
 import eu.darkbot.api.extensions.*;
 import eu.darkbot.api.managers.*;
+import eu.darkbot.ter.dks.types.plugin.LogScrapperDTO;
+import eu.darkbot.ter.dks.types.plugin.PalladiumStatsDTO;
 import eu.darkbot.ter.dks.utils.Formatter;
+import eu.darkbot.ter.dks.utils.plugin.DksPluginInfo;
+import eu.darkbot.ter.dks.utils.plugin.DksPluginSingleton;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -17,12 +21,18 @@ public class PalladiumStats extends SimpleStats<PalladiumStatsConfig> implements
 
     protected OreAPI ore;
     protected boolean isRealZeroAmount = false;
+    protected DksPluginInfo dksPluginInfo;
 
     public PalladiumStats(PluginAPI api, AuthAPI auth, I18nAPI i18n, ExtensionsAPI extensions, OreAPI ore, Main main) {
         super(api, auth, i18n, extensions, main);
         this.ore = ore;
+        this.initDksPluginInfo();
         this.statusMessage.setText(this.getStatusMessageForLabel());
-        System.out.println(this.hangar);
+    }
+
+    public void initDksPluginInfo() {
+        this.dksPluginInfo = DksPluginSingleton.getPluginInfo();
+        this.dksPluginInfo.setPalladiumStats(new PalladiumStatsDTO(this));
     }
 
     @Override
@@ -67,20 +77,13 @@ public class PalladiumStats extends SimpleStats<PalladiumStatsConfig> implements
 
     @Override
     protected String getStatusMessageForLabel() {
-        String status = this.isFirstTick ?
-                this.i18n.get(this.plugin, "palladium_stats.status.initializing") :
-                this.config.getStop() ?
-                    this.i18n.get(this.plugin, "palladium_stats.status.stopped") :
-                    this.i18n.get(this.plugin, "palladium_stats.status.waiting");
+        String status = this.getStatus();
         String time = "-";
         String collected = "-";
         String hour = "-";
         String ee = "-";
 
         if (this.isRunning) {
-            status = this.config.STOP ?
-                    this.i18n.get(this.plugin, "palladium_stats.status.stopped") :
-                    this.i18n.get(this.plugin, "palladium_stats.status.running");
             time = Formatter.formatDuration(this.runningTime);
             collected = Formatter.formatDoubleDots(this.totalCollected);
             hour = Formatter.formatDoubleDots(this.collectedPerHour);
@@ -95,6 +98,59 @@ public class PalladiumStats extends SimpleStats<PalladiumStatsConfig> implements
             Formatter.formatBoldTag(this.i18n.get(this.plugin, "palladium_stats.status.ee_hour") + ": ") + "%s<br>"
         );
 
+        // Update Plugin Info
+        if (this.dksPluginInfo != null && this.dksPluginInfo.getPalladiumStats() != null) {
+            this.dksPluginInfo.getPalladiumStats().refresh();
+        }
+
         return String.format(message, status, time, collected, hour, ee);
+    }
+
+    public String getStatus() {
+        String status = this.isFirstTick ?
+                this.i18n.get(this.plugin, "palladium_stats.status.initializing") :
+                this.config.getStop() ?
+                        this.i18n.get(this.plugin, "palladium_stats.status.stopped") :
+                        this.i18n.get(this.plugin, "palladium_stats.status.waiting");
+
+        if (this.isRunning) {
+            status = this.config.STOP ?
+                    this.i18n.get(this.plugin, "palladium_stats.status.stopped") :
+                    this.i18n.get(this.plugin, "palladium_stats.status.running");
+        }
+
+        return status;
+    }
+
+    public String getRunningTime() {
+        String time = "-";
+        if (this.isRunning) {
+            time = Formatter.formatDuration(this.runningTime);
+        }
+        return time;
+    }
+
+    public String getCollected() {
+        String time = "-";
+        if (this.isRunning) {
+            time = Formatter.formatDoubleDots(this.totalCollected);
+        }
+        return time;
+    }
+
+    public String getCollectedHour() {
+        String time = "-";
+        if (this.isRunning) {
+            time = Formatter.formatDoubleDots(this.collectedPerHour);
+        }
+        return time;
+    }
+
+    public String getExtraEnergyHour() {
+        String ee = "-";
+        if (this.isRunning) {
+            ee = "~" + Formatter.formatDoubleDots(this.collectedPerHour / 15D);
+        }
+        return ee;
     }
 }

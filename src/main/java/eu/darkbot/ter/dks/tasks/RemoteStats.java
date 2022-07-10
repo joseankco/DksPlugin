@@ -9,6 +9,8 @@ import eu.darkbot.ter.dks.utils.VerifierChecker;
 import eu.darkbot.ter.dks.types.config.RemoteStatsConfig;
 import eu.darkbot.ter.dks.types.remotestats.*;
 import eu.darkbot.ter.dks.utils.Http;
+import eu.darkbot.ter.dks.utils.plugin.DksPluginInfo;
+import eu.darkbot.ter.dks.utils.plugin.DksPluginSingleton;
 import eu.darkbot.util.Popups;
 import eu.darkbot.util.SystemUtils;
 
@@ -41,6 +43,7 @@ public class RemoteStats implements Task, Configurable<RemoteStatsConfig>, Extra
     private long nextTick = 0;
     private final JLabel lastSuccededTime;
     private final JLabel lastRequestStatus;
+    private final DksPluginInfo dksPluginInfo;
 
     public RemoteStats(
             AuthAPI auth,
@@ -66,7 +69,7 @@ public class RemoteStats implements Task, Configurable<RemoteStatsConfig>, Extra
         this.plugin = Objects.requireNonNull(this.extensions.getFeatureInfo(getClass())).getPluginInfo();
         this.lastRequestStatus = new JLabel("<html><b>" + this.i18n.get(this.plugin, "remote_stats.server.status.last_post") +  "</b> " + "-</html>");
         this.lastSuccededTime = new JLabel("<html><b>" + this.i18n.get(this.plugin, "remote_stats.server.status.last_success") + "</b> " + "-</html>");
-
+        this.dksPluginInfo = DksPluginSingleton.getPluginInfo();
     }
 
     public String getURL() {
@@ -83,7 +86,8 @@ public class RemoteStats implements Task, Configurable<RemoteStatsConfig>, Extra
             new HeroDTO(this.heroAPI),
             new StatsDTO(this.statsAPI),
             new ModuleDTO(this.botAPI),
-            new MapDTO(this.mapAPI, this.entitiesAPI)
+            new MapDTO(this.mapAPI, this.entitiesAPI),
+            DksPluginSingleton.getPluginInfo()
         ).toJson();
     }
 
