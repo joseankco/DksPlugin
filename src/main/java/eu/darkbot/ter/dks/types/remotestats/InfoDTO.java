@@ -9,13 +9,15 @@ public class InfoDTO {
     private ModuleDTO module;
     private MapDTO map;
     private DksPluginInfo plugin;
+    private UserDataDTO sesion;
 
-    public InfoDTO(HeroDTO hero, StatsDTO stats, ModuleDTO module, MapDTO map, DksPluginInfo plugin) {
+    public InfoDTO(HeroDTO hero, StatsDTO stats, ModuleDTO module, MapDTO map, DksPluginInfo plugin, UserDataDTO sesion) {
         this.hero = hero;
         this.stats = stats;
         this.module = module;
         this.map = map;
         this.plugin = plugin;
+        this.sesion = sesion;
     }
 
     public String toJson() {

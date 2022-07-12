@@ -1,5 +1,6 @@
 package eu.darkbot.ter.dks.tasks;
 
+import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.utils.RuntimeUtil;
 import eu.darkbot.api.PluginAPI;
 import eu.darkbot.api.config.ConfigSetting;
@@ -39,6 +40,7 @@ public class RemoteStats implements Task, Configurable<RemoteStatsConfig>, Extra
     protected final I18nAPI i18n;
     protected final ExtensionsAPI extensions;
     protected final PluginInfo plugin;
+    protected final Main main;
     private RemoteStatsConfig config;
     private long nextTick = 0;
     private final JLabel lastSuccededTime;
@@ -53,7 +55,8 @@ public class RemoteStats implements Task, Configurable<RemoteStatsConfig>, Extra
             StatsAPI stats,
             EntitiesAPI entities,
             I18nAPI i18n,
-            ExtensionsAPI extensions
+            ExtensionsAPI extensions,
+            Main main
     ) {
         if (!Arrays.equals(VerifierChecker.class.getSigners(), getClass().getSigners()))
             throw new SecurityException();
@@ -67,6 +70,7 @@ public class RemoteStats implements Task, Configurable<RemoteStatsConfig>, Extra
         this.i18n = i18n;
         this.extensions = extensions;
         this.plugin = Objects.requireNonNull(this.extensions.getFeatureInfo(getClass())).getPluginInfo();
+        this.main = main;
         this.lastRequestStatus = new JLabel("<html><b>" + this.i18n.get(this.plugin, "remote_stats.server.status.last_post") +  "</b> " + "-</html>");
         this.lastSuccededTime = new JLabel("<html><b>" + this.i18n.get(this.plugin, "remote_stats.server.status.last_success") + "</b> " + "-</html>");
         this.dksPluginInfo = DksPluginSingleton.getPluginInfo();
@@ -87,7 +91,8 @@ public class RemoteStats implements Task, Configurable<RemoteStatsConfig>, Extra
             new StatsDTO(this.statsAPI),
             new ModuleDTO(this.botAPI),
             new MapDTO(this.mapAPI, this.entitiesAPI),
-            DksPluginSingleton.getPluginInfo()
+            DksPluginSingleton.getPluginInfo(),
+            new UserDataDTO(this.main)
         ).toJson();
     }
 
