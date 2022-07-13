@@ -7,7 +7,6 @@ import eu.darkbot.ter.dks.types.config.PalladiumStatsConfig;
 import eu.darkbot.api.PluginAPI;
 import eu.darkbot.api.extensions.*;
 import eu.darkbot.api.managers.*;
-import eu.darkbot.ter.dks.types.plugin.LogScrapperDTO;
 import eu.darkbot.ter.dks.types.plugin.PalladiumStatsDTO;
 import eu.darkbot.ter.dks.utils.Formatter;
 import eu.darkbot.ter.dks.utils.plugin.DksPluginInfo;
@@ -66,8 +65,8 @@ public class PalladiumStats extends SimpleStats<PalladiumStatsConfig> implements
     protected boolean shouldCreateExtraMenuSeparator() {
         String[] precessors = new String[] {
                 "eu.darkbot.ter.dks.tasks.RemoteStats",
-                "eu.darkbot.ter.dks.tasks.LiveLogs",
-                "eu.darkbot.ter.dks.tasks.LogScrapper"
+                "eu.darkbot.ter.dks.tasks.GameLogViewer",
+                "eu.darkbot.ter.dks.tasks.GameLogScrapper"
         };
         String enabled = Arrays.stream(precessors).sequential().filter(f ->
                 Objects.requireNonNull(this.main.featureRegistry.getFeatureDefinition(f)).isEnabled()

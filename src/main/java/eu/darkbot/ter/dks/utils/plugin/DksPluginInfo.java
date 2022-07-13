@@ -1,34 +1,31 @@
 package eu.darkbot.ter.dks.utils.plugin;
 
 import com.google.gson.Gson;
-import eu.darkbot.ter.dks.tasks.LiveLogs;
-import eu.darkbot.ter.dks.types.plugin.LiveLogsDTO;
-import eu.darkbot.ter.dks.types.plugin.LogScrapperDTO;
+import eu.darkbot.ter.dks.types.plugin.GameLogViewerDTO;
+import eu.darkbot.ter.dks.types.plugin.GameLogScrapperDTO;
 import eu.darkbot.ter.dks.types.plugin.PalladiumStatsDTO;
 
-import java.util.ArrayList;
-
 public class DksPluginInfo {
-    private LiveLogsDTO liveLogs;
-    private LogScrapperDTO logScrapper;
+    private GameLogViewerDTO liveLogs;
+    private GameLogScrapperDTO logScrapper;
     private PalladiumStatsDTO palladiumStats;
 
     public DksPluginInfo() {
     }
 
-    public void setLiveLogs(LiveLogsDTO dto) {
+    public void setGameLogViewerDTO(GameLogViewerDTO dto) {
         this.liveLogs = dto;
     }
 
-    public LiveLogsDTO getLiveLogs() {
+    public GameLogViewerDTO getGameLogViewer() {
         return this.liveLogs;
     }
 
-    public void setLogScrapper(LogScrapperDTO dto) {
+    public void setGameLogScrapper(GameLogScrapperDTO dto) {
         this.logScrapper = dto;
     }
 
-    public LogScrapperDTO getLogScrapper() {
+    public GameLogScrapperDTO getGameLogScrapper() {
         return this.logScrapper;
     }
 

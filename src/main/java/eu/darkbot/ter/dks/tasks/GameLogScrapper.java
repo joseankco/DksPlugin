@@ -3,17 +3,17 @@ package eu.darkbot.ter.dks.tasks;
 import com.github.manolo8.darkbot.Main;
 import eu.darkbot.api.PluginAPI;
 import eu.darkbot.api.config.ConfigSetting;
+import eu.darkbot.api.events.EventHandler;
+import eu.darkbot.api.events.Listener;
 import eu.darkbot.api.extensions.*;
 import eu.darkbot.api.managers.AuthAPI;
 import eu.darkbot.api.managers.ExtensionsAPI;
+import eu.darkbot.api.managers.GameLogAPI;
 import eu.darkbot.api.managers.I18nAPI;
-import eu.darkbot.ter.dks.types.plugin.LiveLogsDTO;
-import eu.darkbot.ter.dks.types.plugin.LogScrapperDTO;
+import eu.darkbot.ter.dks.types.plugin.GameLogScrapperDTO;
 import eu.darkbot.ter.dks.utils.VerifierChecker;
-import eu.darkbot.ter.dks.types.config.LogScrapperConfig;
+import eu.darkbot.ter.dks.types.config.GameLogScrapperConfig;
 import eu.darkbot.ter.dks.utils.Formatter;
-import eu.darkbot.ter.dks.utils.console.ConsoleOutputCapturer;
-import eu.darkbot.ter.dks.utils.console.ConsoleOutputCapturerSingleton;
 import eu.darkbot.ter.dks.utils.plugin.DksPluginInfo;
 import eu.darkbot.ter.dks.utils.plugin.DksPluginSingleton;
 import eu.darkbot.util.Popups;
@@ -28,8 +28,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-@Feature(name = "Log Scrapper", description = "Allows you to extract patterns from DarkBot logs in real time")
-public class LogScrapper implements Task, ExtraMenus, Configurable<LogScrapperConfig>, InstructionProvider {
+@Feature(name = "Game Log Scrapper", description = "Allows you to extract patterns from DarkOrbit logs in real time")
+public class GameLogScrapper implements Task, ExtraMenus, Configurable<GameLogScrapperConfig>, InstructionProvider, Listener {
 
     protected final I18nAPI i18n;
     protected final ExtensionsAPI extensions;
@@ -41,9 +41,9 @@ public class LogScrapper implements Task, ExtraMenus, Configurable<LogScrapperCo
     protected long lastTickUiRefresh;
     protected DksPluginInfo dksPluginInfo;
 
-    protected final ConsoleOutputCapturer capturer;
-    protected LogScrapperConfig config;
+    protected GameLogScrapperConfig config;
     protected HashMap<String, int[]> map;
+    protected boolean capturing;
 
     protected JLabel runningLabel;
     protected JTabbedPane tabs;
@@ -59,7 +59,7 @@ public class LogScrapper implements Task, ExtraMenus, Configurable<LogScrapperCo
     protected JPanel managePanel;
     protected JFrame manageFrame;
 
-    public LogScrapper(AuthAPI auth, I18nAPI i18n, ExtensionsAPI extensions, Main main) {
+    public GameLogScrapper(AuthAPI auth, I18nAPI i18n, ExtensionsAPI extensions, Main main) {
         if (!Arrays.equals(VerifierChecker.class.getSigners(), getClass().getSigners()))
             throw new SecurityException();
         VerifierChecker.checkAuthenticity(auth);
@@ -69,8 +69,8 @@ public class LogScrapper implements Task, ExtraMenus, Configurable<LogScrapperCo
         this.plugin = Objects.requireNonNull(this.extensions.getFeatureInfo(getClass())).getPluginInfo();
         this.main = main;
 
-        this.capturer = ConsoleOutputCapturerSingleton.getCapturer();
         this.map = new HashMap<>();
+        this.capturing = true;
 
         this.initUi();
         this.initDksPluginInfo();
@@ -81,7 +81,7 @@ public class LogScrapper implements Task, ExtraMenus, Configurable<LogScrapperCo
 
     public void initDksPluginInfo() {
         this.dksPluginInfo = DksPluginSingleton.getPluginInfo();
-        this.dksPluginInfo.setLogScrapper(new LogScrapperDTO(this));
+        this.dksPluginInfo.setGameLogScrapper(new GameLogScrapperDTO(this));
     }
 
     public void initUi() {
@@ -101,8 +101,8 @@ public class LogScrapper implements Task, ExtraMenus, Configurable<LogScrapperCo
 
         // TABS
         this.tabs = new JTabbedPane();
-        tabs.add(this.tableFrame.getContentPane(), this.i18n.get(this.plugin, "log_scrapper.buttons.status.desc"));
-        tabs.add(this.manageFrame.getContentPane(), this.i18n.get(this.plugin, "log_scrapper.buttons.patterns.desc"));
+        tabs.add(this.tableFrame.getContentPane(), this.i18n.get(this.plugin, "game_log_scrapper.buttons.status.desc"));
+        tabs.add(this.manageFrame.getContentPane(), this.i18n.get(this.plugin, "game_log_scrapper.buttons.patterns.desc"));
         tabs.setPreferredSize(new Dimension(800, 300));
 
         // RUNNING TIME
@@ -110,7 +110,7 @@ public class LogScrapper implements Task, ExtraMenus, Configurable<LogScrapperCo
     }
 
     public JButton getAddPatternButton(JTextField text) {
-        JButton add = new JButton(this.i18n.get(this.plugin, "log_scrapper.buttons.add"));
+        JButton add = new JButton(this.i18n.get(this.plugin, "game_log_scrapper.buttons.add"));
         add.addActionListener(e -> {
             if (!text.getText().trim().equals("")) {
                 this.config.addPattern(text.getText().trim());
@@ -122,7 +122,7 @@ public class LogScrapper implements Task, ExtraMenus, Configurable<LogScrapperCo
     }
 
     public JButton getDeletePatternButton(String pattern) {
-        JButton delete = new JButton(this.i18n.get(this.plugin, "log_scrapper.buttons.delete"));
+        JButton delete = new JButton(this.i18n.get(this.plugin, "game_log_scrapper.buttons.delete"));
         delete.addActionListener(e -> {
             this.config.removePattern(pattern);
             this.refreshUi(true);
@@ -132,7 +132,7 @@ public class LogScrapper implements Task, ExtraMenus, Configurable<LogScrapperCo
     }
 
     public JButton getEditPatternButton(String pattern, JTextField text) {
-        JButton edit = new JButton(this.i18n.get(this.plugin, "log_scrapper.buttons.edit"));
+        JButton edit = new JButton(this.i18n.get(this.plugin, "game_log_scrapper.buttons.edit"));
         edit.addActionListener(e -> {
             String newPattern = text.getText().trim();
             if (!newPattern.equals("")) {
@@ -145,7 +145,7 @@ public class LogScrapper implements Task, ExtraMenus, Configurable<LogScrapperCo
     }
 
     public JButton getUpPatternButton(String pattern) {
-        // JButton up = new JButton(this.i18n.get(this.plugin, "log_scrapper.buttons.up"));
+        // JButton up = new JButton(this.i18n.get(this.plugin, "game_log_scrapper.buttons.up"));
         JButton up = new JButton("^");
         up.addActionListener(e -> {
             this.config.patternUp(pattern);
@@ -156,7 +156,7 @@ public class LogScrapper implements Task, ExtraMenus, Configurable<LogScrapperCo
     }
 
     public JButton getDownPatternButton(String pattern) {
-        // JButton down = new JButton(this.i18n.get(this.plugin, "log_scrapper.buttons.down"));
+        // JButton down = new JButton(this.i18n.get(this.plugin, "game_log_scrapper.buttons.down"));
         JButton down = new JButton("v");
         down.addActionListener(e -> {
             this.config.patternDown(pattern);
@@ -215,29 +215,41 @@ public class LogScrapper implements Task, ExtraMenus, Configurable<LogScrapperCo
     }
 
     public String getPopupTitle() {
-        return "Log Scrapper";
+        return "Game Log Scrapper";
     }
 
     protected String getTitle(String title) {
         return "<html><b><h2 style=\"margin-bottom: 1px; margin-top: 1px\">" + title + "</h2></b></html>";
     }
 
+    public boolean isCapturing() {
+        return this.capturing;
+    }
+
+    public void stop() {
+        this.capturing = false;
+    }
+
+    public void start() {
+        this.capturing = true;
+    }
+
     public void showStatusPopup() {
         Object[] objects = new Object[] { runningLabel, tabs };
         JOptionPane options = new JOptionPane(objects);
 
-        JButton reset = new JButton(this.i18n.get(this.plugin, "log_scrapper.buttons.reset"));
+        JButton reset = new JButton(this.i18n.get(this.plugin, "game_log_scrapper.buttons.reset"));
         reset.addActionListener(e -> {
             this.resetAll();
         });
 
-        JButton startStop = new JButton(this.capturer.isCapturing() ? "Stop" : "Start");
+        JButton startStop = new JButton(this.isCapturing() ? "Stop" : "Start");
         startStop.addActionListener(e -> {
-            if (this.capturer.isCapturing()) {
-                this.capturer.stop();
+            if (this.isCapturing()) {
+                this.stop();
                 startStop.setText("Start");
             } else {
-                this.capturer.start();
+                this.start();
                 startStop.setText("Stop");
             }
         });
@@ -256,7 +268,7 @@ public class LogScrapper implements Task, ExtraMenus, Configurable<LogScrapperCo
     public boolean shouldCreateExtraMenuSeparator() {
         String[] precessors = new String[] {
                 "eu.darkbot.ter.dks.tasks.RemoteStats",
-                "eu.darkbot.ter.dks.tasks.LiveLogs",
+                "eu.darkbot.ter.dks.tasks.GameLogViewer",
         };
         String enabled = Arrays.stream(precessors).sequential().filter(f ->
                 Objects.requireNonNull(this.main.featureRegistry.getFeatureDefinition(f)).isEnabled()
@@ -272,9 +284,8 @@ public class LogScrapper implements Task, ExtraMenus, Configurable<LogScrapperCo
 
     @Override
     public void onTickTask() {
-        this.refreshPatternsMap();
         this.refreshUi(false);
-        this.dksPluginInfo.getLogScrapper().refresh();
+        this.dksPluginInfo.getGameLogScrapper().refresh();
     }
 
     public void refreshUi(boolean force) {
@@ -291,8 +302,15 @@ public class LogScrapper implements Task, ExtraMenus, Configurable<LogScrapperCo
         }
     }
 
-    public void refreshPatternsMap() {
-        List<String> lines = this.capturer.getNewLinesStd();
+    @EventHandler
+    public void onLogMessage(GameLogAPI.LogMessageEvent message) {
+        if (this.isCapturing()) {
+            String msg = message.getMessage();
+            this.refreshPatternsMap(msg);
+        }
+    }
+
+    public void refreshPatternsMap(String line) {
         List<String> patterns = this.config.getPatterns();
 
         patterns.stream().filter(p -> !p.equals("")).forEach(pattern -> {
@@ -302,14 +320,12 @@ public class LogScrapper implements Task, ExtraMenus, Configurable<LogScrapperCo
                 }
                 Pattern regexPattern = this.config.getRegExPattern(pattern);
                 int[] actual = this.map.get(pattern);
-                for (String line: lines) {
-                    Matcher matcher = regexPattern.matcher(line);
-                    if (matcher.find()) {
-                        actual[0]++;
-                        if (this.config.isNumberedPattern(pattern)) {
-                            int total = Integer.parseInt(matcher.group("ExtractedNumber").replace(".", ""));
-                            actual[1] += total;
-                        }
+                Matcher matcher = regexPattern.matcher(line);
+                if (matcher.find()) {
+                    actual[0]++;
+                    if (this.config.isNumberedPattern(pattern)) {
+                        int total = Integer.parseInt(matcher.group("ExtractedNumber").replace(".", ""));
+                        actual[1] += total;
                     }
                 }
                 this.map.put(pattern, actual);
@@ -326,11 +342,11 @@ public class LogScrapper implements Task, ExtraMenus, Configurable<LogScrapperCo
 
     public void buildTable() {
         if (this.model.getColumnCount() == 0) {
-            this.model.addColumn(this.i18n.get(this.plugin, "log_scrapper.table.pattern"));
-            this.model.addColumn(this.i18n.get(this.plugin, "log_scrapper.table.occurrences"));
-            this.model.addColumn(this.i18n.get(this.plugin, "log_scrapper.table.occurrencesh"));
-            this.model.addColumn(this.i18n.get(this.plugin, "log_scrapper.table.total"));
-            this.model.addColumn(this.i18n.get(this.plugin, "log_scrapper.table.totalh"));
+            this.model.addColumn(this.i18n.get(this.plugin, "game_log_scrapper.table.pattern"));
+            this.model.addColumn(this.i18n.get(this.plugin, "game_log_scrapper.table.occurrences"));
+            this.model.addColumn(this.i18n.get(this.plugin, "game_log_scrapper.table.occurrencesh"));
+            this.model.addColumn(this.i18n.get(this.plugin, "game_log_scrapper.table.total"));
+            this.model.addColumn(this.i18n.get(this.plugin, "game_log_scrapper.table.totalh"));
         }
 
         this.table.getColumnModel().getColumn(0).setMinWidth(350);
@@ -370,12 +386,12 @@ public class LogScrapper implements Task, ExtraMenus, Configurable<LogScrapperCo
     }
 
     @Override
-    public void setConfig(ConfigSetting<LogScrapperConfig> arg0) {
+    public void setConfig(ConfigSetting<GameLogScrapperConfig> arg0) {
         this.config = arg0.getValue();
     }
 
     public JButton getTutorialButton() {
-        JButton tutorial = new JButton(this.i18n.get(this.plugin, "log_scrapper.buttons.tutorial"));
+        JButton tutorial = new JButton(this.i18n.get(this.plugin, "game_log_scrapper.buttons.tutorial"));
         tutorial.addActionListener(e -> {
             this.showTutorialPopup();
         });
@@ -383,7 +399,7 @@ public class LogScrapper implements Task, ExtraMenus, Configurable<LogScrapperCo
     }
 
     public JButton getOverallStatusButton() {
-        JButton status = new JButton(this.i18n.get(this.plugin, "log_scrapper.buttons.status"));
+        JButton status = new JButton(this.i18n.get(this.plugin, "game_log_scrapper.buttons.status"));
         status.addActionListener(e -> {
             this.tabs.setSelectedIndex(0);
             this.showStatusPopup();
@@ -392,7 +408,7 @@ public class LogScrapper implements Task, ExtraMenus, Configurable<LogScrapperCo
     }
 
     public JButton getMangePatternsButton() {
-        JButton patterns = new JButton(this.i18n.get(this.plugin, "log_scrapper.buttons.patterns"));
+        JButton patterns = new JButton(this.i18n.get(this.plugin, "game_log_scrapper.buttons.patterns"));
         patterns.addActionListener(e -> {
             this.tabs.setSelectedIndex(1);
             this.showStatusPopup();
@@ -401,24 +417,23 @@ public class LogScrapper implements Task, ExtraMenus, Configurable<LogScrapperCo
     }
 
     public void showTutorialPopup() {
-        JButton info = new JButton(this.i18n.get(this.plugin, "log_scrapper.tutorial.button.info"));
+        JButton info = new JButton(this.i18n.get(this.plugin, "game_log_scrapper.tutorial.button.info"));
         info.addActionListener(e -> {
             SystemUtils.openUrl("https://github.com/joseankco/DksPluginReleases/blob/main/info/LogScrapper.md");
         });
         Object[] objects = new Object[] {
-                new JLabel(this.i18n.get(this.plugin, "log_scrapper.tutorial.info1")),
-                new JLabel(this.i18n.get(this.plugin, "log_scrapper.tutorial.info2")),
+                new JLabel(this.i18n.get(this.plugin, "game_log_scrapper.tutorial.info1")),
+                new JLabel(this.i18n.get(this.plugin, "game_log_scrapper.tutorial.info2")),
                 " ",
-                new JLabel(this.i18n.get(this.plugin, "log_scrapper.tutorial.pattern_types")),
-                new JLabel(this.i18n.get(this.plugin, "log_scrapper.tutorial.normal_pattern")),
-                new JLabel("      " + this.i18n.get(this.plugin, "log_scrapper.tutorial.normal_example")),
-                new JLabel(this.i18n.get(this.plugin, "log_scrapper.tutorial.numbered_pattern")),
-                new JLabel("      " + this.i18n.get(this.plugin, "log_scrapper.tutorial.numbered_example")),
-                new JLabel("      " + this.i18n.get(this.plugin, "log_scrapper.tutorial.numbered_example.desc1")),
-                new JLabel("      " + this.i18n.get(this.plugin, "log_scrapper.tutorial.numbered_example.desc2")),
+                new JLabel(this.i18n.get(this.plugin, "game_log_scrapper.tutorial.pattern_types")),
+                new JLabel(this.i18n.get(this.plugin, "game_log_scrapper.tutorial.normal_pattern")),
+                new JLabel("      " + this.i18n.get(this.plugin, "game_log_scrapper.tutorial.normal_example")),
+                new JLabel(this.i18n.get(this.plugin, "game_log_scrapper.tutorial.numbered_pattern")),
+                new JLabel("      " + this.i18n.get(this.plugin, "game_log_scrapper.tutorial.numbered_example")),
+                new JLabel("      " + this.i18n.get(this.plugin, "game_log_scrapper.tutorial.numbered_example.desc1")),
+                new JLabel("      " + this.i18n.get(this.plugin, "game_log_scrapper.tutorial.numbered_example.desc2")),
                 " ",
-                new JLabel(this.i18n.get(this.plugin, "log_scrapper.tutorial.note1")),
-                new JLabel(this.i18n.get(this.plugin, "log_scrapper.tutorial.important1"))
+                new JLabel(this.i18n.get(this.plugin, "game_log_scrapper.tutorial.note1"))
         };
         JOptionPane options = new JOptionPane(objects);
         options.setOptions(new Object[] { info, "OK" });
@@ -449,7 +464,7 @@ public class LogScrapper implements Task, ExtraMenus, Configurable<LogScrapperCo
         return new ArrayList<>();
     }
 
-    public LogScrapperConfig getConfig() {
+    public GameLogScrapperConfig getConfig() {
         return this.config;
     }
 

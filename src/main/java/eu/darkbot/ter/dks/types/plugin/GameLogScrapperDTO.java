@@ -1,18 +1,18 @@
 package eu.darkbot.ter.dks.types.plugin;
 
 import com.google.gson.Gson;
-import eu.darkbot.ter.dks.tasks.LogScrapper;
+import eu.darkbot.ter.dks.tasks.GameLogScrapper;
 import eu.darkbot.ter.dks.utils.Formatter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class LogScrapperDTO {
-    private List<PatternDTO> patterns;
-    private final transient LogScrapper logScrapper;
+public class GameLogScrapperDTO {
+    private final List<PatternDTO> patterns;
+    private final transient GameLogScrapper logScrapper;
 
-    public LogScrapperDTO(final LogScrapper logScrapper) {
+    public GameLogScrapperDTO(final GameLogScrapper logScrapper) {
         this.logScrapper = logScrapper;
         this.patterns = new ArrayList<>();
     }

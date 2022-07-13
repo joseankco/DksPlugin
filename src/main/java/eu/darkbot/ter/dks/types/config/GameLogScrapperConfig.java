@@ -1,7 +1,7 @@
 package eu.darkbot.ter.dks.types.config;
 
 import eu.darkbot.api.config.annotations.Configuration;
-import eu.darkbot.api.config.annotations.Readonly;
+import eu.darkbot.api.config.annotations.Option;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -9,13 +9,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
 
-@Configuration("log_scrapper")
-public class LogScrapperConfig {
+@Configuration("game_log_scrapper")
+public class GameLogScrapperConfig {
 
-    @Readonly
+    @Option.Ignore
     public String PATTERNS;
 
-    public LogScrapperConfig() {
+    public GameLogScrapperConfig() {
         this.PATTERNS = "";
     }
 

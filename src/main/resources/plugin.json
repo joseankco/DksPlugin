@@ -1,14 +1,14 @@
 {
   "name": "DksPlugin",
   "author": "Ter.DKS",
-  "version": "1.3.2",
+  "version": "1.3.3",
   "minVersion": "1.13.17 beta 106",
   "supportedVersion": "1.13.17 beta 106",
   "basePackage": "eu.darkbot.ter.dks",
   "features": [
     "eu.darkbot.ter.dks.tasks.RemoteStats",
-    "eu.darkbot.ter.dks.tasks.LiveLogs",
-    "eu.darkbot.ter.dks.tasks.LogScrapper",
+    "eu.darkbot.ter.dks.tasks.GameLogViewer",
+    "eu.darkbot.ter.dks.tasks.GameLogScrapper",
     "eu.darkbot.ter.dks.behaviours.PalladiumStats"
   ],
   "donation" : "https://www.paypal.me/joseankco",

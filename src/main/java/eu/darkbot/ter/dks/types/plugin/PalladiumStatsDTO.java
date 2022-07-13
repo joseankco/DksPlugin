@@ -1,11 +1,6 @@
 package eu.darkbot.ter.dks.types.plugin;
 
-import com.google.gson.Gson;
 import eu.darkbot.ter.dks.behaviours.PalladiumStats;
-import eu.darkbot.ter.dks.tasks.LiveLogs;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class PalladiumStatsDTO {
     private String status;
