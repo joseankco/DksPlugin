@@ -1,6 +1,7 @@
 package eu.darkbot.ter.dks.behaviours;
 
 import com.github.manolo8.darkbot.Main;
+import eu.darkbot.ter.dks.api.hangar.HeroItem;
 import eu.darkbot.ter.dks.api.hangar.LocalizationID;
 import eu.darkbot.ter.dks.types.SimpleStats;
 import eu.darkbot.ter.dks.types.config.PalladiumStatsConfig;
@@ -42,7 +43,8 @@ public class PalladiumStats extends SimpleStats<PalladiumStatsConfig> implements
                 boolean success = this.hangar.updateCurrentHangar();
                 Integer stable = null;
                 if (success) {
-                    Integer amount = this.hangar.getItem(LocalizationID.ORE_PALLADIUM).getQuantity();
+                    HeroItem item = this.hangar.getItem(LocalizationID.ORE_PALLADIUM);
+                    Integer amount = item == null ? 0 : item.getQuantity();
                     stable = amount == null ? 0 : amount;
                     this.isRealZeroAmount = stable == 0;
                 }
