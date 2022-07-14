@@ -213,6 +213,9 @@ public class GameLogViewer implements Task, ExtraMenus, Configurable<GameLogView
             this.gameLogs.remove(0);
             this.gameLogTimes.remove(0);
         }
+        if (this.shouldRefreshLogs()) {
+            this.setGameLogs();
+        }
         this.dksPluginInfo.getGameLogViewer().refresh();
     }
 
