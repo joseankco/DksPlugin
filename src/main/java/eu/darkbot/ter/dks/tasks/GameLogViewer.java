@@ -70,8 +70,8 @@ public class GameLogViewer implements Task, ExtraMenus, Configurable<GameLogView
     public void onLogMessage(GameLogAPI.LogMessageEvent message) {
         if (this.isCapturing()) {
             String msg = message.getMessage();
-            this.gameLogs.add(msg);
             this.gameLogTimes.add(new Date());
+            this.gameLogs.add(msg);
             if (this.shouldRefreshLogs()) {
                 this.setGameLogs();
             }
@@ -210,8 +210,8 @@ public class GameLogViewer implements Task, ExtraMenus, Configurable<GameLogView
         int size = this.gameLogs.size();
         int diff = size - this.config.MAX_STD_LINES;
         for (int i = 0; (diff > 0) && (i < diff); i++) {
-            this.gameLogs.remove(0);
             this.gameLogTimes.remove(0);
+            this.gameLogs.remove(0);
         }
         if (this.shouldRefreshLogs()) {
             this.setGameLogs();
@@ -238,8 +238,12 @@ public class GameLogViewer implements Task, ExtraMenus, Configurable<GameLogView
     public List<String> getGameLogs(boolean b) {
         List<String> lines = new ArrayList<>();
         for (int i = this.gameLogs.size() - 1; i >= 0; i--) {
-            String line = formatter.format(this.gameLogTimes.get(i)) + " " + this.gameLogs.get(i);
-            lines.add(line);
+            Date time = this.gameLogTimes.get(i);
+            String log = this.gameLogs.get(i);
+            if (time != null && log != null) {
+                String line = formatter.format(time) + " " + log;
+                lines.add(line);
+            }
         }
         return lines;
     }
