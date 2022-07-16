@@ -40,8 +40,7 @@ public class GameLogViewer implements Task, ExtraMenus, Configurable<GameLogView
     protected JPanel panelFilter;
     protected JTextField filterStd;
 
-    protected List<String> gameLogs;
-    protected List<Date> gameLogTimes;
+    protected List<LogLine> gameLogs;
     protected SimpleDateFormat formatter;
 
     protected boolean capturing;
@@ -60,7 +59,6 @@ public class GameLogViewer implements Task, ExtraMenus, Configurable<GameLogView
         this.log = log;
         this.capturing = true;
         this.gameLogs = new ArrayList<>();
-        this.gameLogTimes = new ArrayList<>();
         this.formatter = new SimpleDateFormat("[yyyy-MM-dd HH:mm:ss]");
         this.initGui();
         this.initDksPluginInfo();
@@ -70,8 +68,7 @@ public class GameLogViewer implements Task, ExtraMenus, Configurable<GameLogView
     public void onLogMessage(GameLogAPI.LogMessageEvent message) {
         if (this.isCapturing()) {
             String msg = message.getMessage();
-            this.gameLogTimes.add(new Date());
-            this.gameLogs.add(msg);
+            this.gameLogs.add(new LogLine(new Date(), msg));
             if (this.shouldRefreshLogs()) {
                 this.setGameLogs();
             }
@@ -91,17 +88,17 @@ public class GameLogViewer implements Task, ExtraMenus, Configurable<GameLogView
         Matcher matcher;
         StringBuilder sb = new StringBuilder();
         for (int i = this.gameLogs.size() - 1; i >= 0; i--) {
-            String line = this.gameLogs.get(i);
+            LogLine log = this.gameLogs.get(i);
             boolean matches = true;
             if (filter != null) {
-                matcher = pattern.matcher(line);
+                matcher = pattern.matcher(log.getLine());
                 matches = matcher.find();
             }
             if (matches) {
                 if (this.config.TIMED) {
-                    sb.append(formatter.format(this.gameLogTimes.get(i))).append(" ");
+                    sb.append(formatter.format(log.getDate())).append(" ");
                 }
-                sb.append(line).append("\n");
+                sb.append(log.getLine()).append("\n");
             }
         }
         this.textSysOut.setText(sb.toString());
@@ -210,7 +207,6 @@ public class GameLogViewer implements Task, ExtraMenus, Configurable<GameLogView
         int size = this.gameLogs.size();
         int diff = size - this.config.MAX_STD_LINES;
         for (int i = 0; (diff > 0) && (i < diff); i++) {
-            this.gameLogTimes.remove(0);
             this.gameLogs.remove(0);
         }
         if (this.shouldRefreshLogs()) {
@@ -226,7 +222,6 @@ public class GameLogViewer implements Task, ExtraMenus, Configurable<GameLogView
 
     public void clearCaptures() {
         this.gameLogs = new ArrayList<>();
-        this.gameLogTimes = new ArrayList<>();
         this.setGameLogs();
     }
 
@@ -238,13 +233,29 @@ public class GameLogViewer implements Task, ExtraMenus, Configurable<GameLogView
     public List<String> getGameLogs(boolean b) {
         List<String> lines = new ArrayList<>();
         for (int i = this.gameLogs.size() - 1; i >= 0; i--) {
-            Date time = this.gameLogTimes.get(i);
-            String log = this.gameLogs.get(i);
-            if (time != null && log != null) {
-                String line = formatter.format(time) + " " + log;
+            LogLine log = this.gameLogs.get(i);
+            if (log.getDate() != null && log.getLine() != null) {
+                String line = formatter.format(log.getDate()) + " " + log.getLine();
                 lines.add(line);
             }
         }
         return lines;
+    }
+
+    public static class LogLine {
+        public final Date date;
+        public final String line;
+        public LogLine(Date date, String line) {
+            this.date = date;
+            this.line = line;
+        }
+
+        public Date getDate() {
+            return this.date;
+        }
+
+        public String getLine() {
+            return this.line;
+        }
     }
 }

@@ -9,6 +9,7 @@ import eu.darkbot.api.game.other.Health;
 import eu.darkbot.api.managers.HeroAPI;
 
 public class HeroDTO {
+    private Integer id;
     private Double x;
     private Double y;
     private String configuration;
@@ -25,6 +26,7 @@ public class HeroDTO {
     private TargetDTO target;
 
     public HeroDTO(HeroAPI hero) {
+        this.id = hero.getId();
         this.x = hero.getX();
         this.y = hero.getY();
         this.configuration = hero.getConfiguration().name();

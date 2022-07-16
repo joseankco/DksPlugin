@@ -1,6 +1,9 @@
 package eu.darkbot.ter.dks.types.remotestats;
 
 import com.google.gson.Gson;
+import eu.darkbot.api.managers.BotAPI;
+import eu.darkbot.api.managers.ConfigAPI;
+import eu.darkbot.api.managers.HeroAPI;
 import eu.darkbot.api.managers.StatsAPI;
 
 import java.time.Duration;

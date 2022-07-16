@@ -10,6 +10,7 @@ public class InfoDTO {
     private MapDTO map;
     private DksPluginInfo plugin;
     private UserDataDTO sesion;
+    private long tick;
 
     public InfoDTO(HeroDTO hero, StatsDTO stats, ModuleDTO module, MapDTO map, DksPluginInfo plugin, UserDataDTO sesion) {
         this.hero = hero;
@@ -18,6 +19,7 @@ public class InfoDTO {
         this.map = map;
         this.plugin = plugin;
         this.sesion = sesion;
+        this.tick = System.currentTimeMillis();
     }
 
     public String toJson() {
