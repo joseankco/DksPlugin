@@ -25,6 +25,8 @@ public class RemoteStatsConfig {
     @Editor(JFileOpener.class)
     public String SERVER_FILE = "";
 
+    public boolean HASH = true;
+
     public void setServerFile(String path) {
         this.SERVER_FILE = path;
     }

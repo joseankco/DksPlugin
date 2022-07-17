@@ -186,12 +186,13 @@ public class RemoteStats implements Task, Configurable<RemoteStatsConfig>, Extra
     }
 
     protected void showServerPopup() {
-        JLabel runcmd = new JLabel(String.format("<html>cmd /k start \"DksPluginRemoteServer\" <br> cmd /c <br>%s <br> --host %s <br> --port %s <br> --auth %s</html>",
+        JLabel runcmd = new JLabel(String.format("<html>cmd /k start \"DksPluginRemoteServer\" <br> cmd /c <br>%s <br> --host %s <br> --port %s <br> --auth %s%s</html>",
                 this.config.SERVER_FILE,
                 this.config.HOST,
                 this.config.PORT,
-                this.config.NGROK_AUTH.trim())
-        );
+                this.config.NGROK_AUTH.trim(),
+                this.config.HASH ? "" : " <br> --no-hashed"
+        ));
         runcmd.setOpaque(true);
         runcmd.setBackground(Color.black);
         runcmd.setBorder(new EmptyBorder(10, 10, 10, 10));
@@ -215,7 +216,8 @@ public class RemoteStats implements Task, Configurable<RemoteStatsConfig>, Extra
                             this.config.SERVER_FILE.trim(),
                             "--host", this.config.HOST.trim(),
                             "--port", String.valueOf(this.config.PORT).trim(),
-                            "--auth", this.config.NGROK_AUTH.trim()
+                            "--auth", this.config.NGROK_AUTH.trim(),
+                            this.config.HASH ? "--hashed" : "--no-hashed"
                         );
                     } catch (IOException ex) {
                         ex.printStackTrace();
