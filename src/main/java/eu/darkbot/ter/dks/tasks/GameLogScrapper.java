@@ -261,7 +261,9 @@ public class GameLogScrapper implements Task, ExtraMenus, Configurable<GameLogSc
     private void resetAll() {
         this.runningTime = Duration.ofSeconds(0);
         this.lastTick = System.currentTimeMillis();
-        this.map = new HashMap<>();
+        this.map.forEach((key, value) -> {
+            this.map.put(key, new int[] {0, 0});
+        });
         this.refreshUi(true);
     }
 
@@ -363,7 +365,9 @@ public class GameLogScrapper implements Task, ExtraMenus, Configurable<GameLogSc
                 if (info != null) {
                     int occurrences = info[0], total = info[1];
                     double occurrencesHour = (occurrences / ((double) this.runningTime.getSeconds())) * 3600;
+                    occurrencesHour = Double.isNaN(occurrencesHour) ? 0 : occurrencesHour;
                     double totalHour = (total / ((double) this.runningTime.getSeconds())) * 3600;
+                    totalHour = Double.isNaN(totalHour) ? 0 : totalHour;
                     boolean isNumbered = this.config.isNumberedPattern(pattern);
                     String[] columns = new String[] {
                             pattern,
