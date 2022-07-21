@@ -109,7 +109,12 @@ public abstract class SimpleStats<T extends SimpleStatsConfig> implements Behavi
     @Override
     public void onStoppedBehavior() {
         this.isStoppedTick = true;
-        this.lastTick = System.currentTimeMillis();
+        if (this.config.getShouldIgnoreBotStopped()) {
+            this.lastTick = System.currentTimeMillis();
+        } else {
+            this.refreshRunningTime();
+            this.setStatusMessage();
+        }
     }
 
     protected boolean shouldRefreshData() {
