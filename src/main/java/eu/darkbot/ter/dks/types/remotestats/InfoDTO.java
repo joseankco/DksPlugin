@@ -10,15 +10,17 @@ public class InfoDTO {
     private MapDTO map;
     private DksPluginInfo plugin;
     private UserDataDTO sesion;
+    private DeathsDTO deaths;
     private long tick;
 
-    public InfoDTO(HeroDTO hero, StatsDTO stats, ModuleDTO module, MapDTO map, DksPluginInfo plugin, UserDataDTO sesion) {
+    public InfoDTO(HeroDTO hero, StatsDTO stats, ModuleDTO module, MapDTO map, DksPluginInfo plugin, UserDataDTO sesion, DeathsDTO deaths) {
         this.hero = hero;
         this.stats = stats;
         this.module = module;
         this.map = map;
         this.plugin = plugin;
         this.sesion = sesion;
+        this.deaths = deaths;
         this.tick = System.currentTimeMillis();
     }
 

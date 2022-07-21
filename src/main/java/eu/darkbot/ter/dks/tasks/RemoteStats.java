@@ -41,6 +41,8 @@ public class RemoteStats implements Task, Configurable<RemoteStatsConfig>, Extra
     protected final ExtensionsAPI extensions;
     protected final PluginInfo plugin;
     protected final Main main;
+    protected final RepairAPI repair;
+    protected final BoosterAPI booster;
     private RemoteStatsConfig config;
     private long nextTick = 0;
     private final JLabel lastSuccededTime;
@@ -56,7 +58,9 @@ public class RemoteStats implements Task, Configurable<RemoteStatsConfig>, Extra
             EntitiesAPI entities,
             I18nAPI i18n,
             ExtensionsAPI extensions,
-            Main main
+            Main main,
+            RepairAPI repair,
+            BoosterAPI booster
     ) {
         if (!Arrays.equals(VerifierChecker.class.getSigners(), getClass().getSigners()))
             throw new SecurityException();
@@ -71,6 +75,8 @@ public class RemoteStats implements Task, Configurable<RemoteStatsConfig>, Extra
         this.extensions = extensions;
         this.plugin = Objects.requireNonNull(this.extensions.getFeatureInfo(getClass())).getPluginInfo();
         this.main = main;
+        this.repair = repair;
+        this.booster = booster;
         this.lastRequestStatus = new JLabel("<html><b>" + this.i18n.get(this.plugin, "remote_stats.server.status.last_post") +  "</b> " + "-</html>");
         this.lastSuccededTime = new JLabel("<html><b>" + this.i18n.get(this.plugin, "remote_stats.server.status.last_success") + "</b> " + "-</html>");
         this.dksPluginInfo = DksPluginSingleton.getPluginInfo();
@@ -87,12 +93,13 @@ public class RemoteStats implements Task, Configurable<RemoteStatsConfig>, Extra
 
     public String getMessage() {
         return new InfoDTO(
-            new HeroDTO(this.heroAPI),
+            new HeroDTO(this.heroAPI, this.booster),
             new StatsDTO(this.statsAPI),
             new ModuleDTO(this.botAPI),
             new MapDTO(this.mapAPI, this.entitiesAPI),
             DksPluginSingleton.getPluginInfo(),
-            new UserDataDTO(this.main)
+            new UserDataDTO(this.main),
+            new DeathsDTO(this.repair)
         ).toJson();
     }
 
