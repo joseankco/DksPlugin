@@ -50,6 +50,7 @@ public class HangarAPI {
                 this.hangars = this.currentHangar.getData().getRet().getHangars();
                 this.equippableItems = this.currentHangar.getData().getRet().getItems();
                 this.itemInfos = this.currentHangar.getData().getRet().getItemInfos();
+                this.items.clear();
                 for (ItemInfo item : this.itemInfos) {
                     this.items.put(item.getLocalizationId(), new HeroItem(this.getEquippableItemFromItemInfo(item), item));
                 }
