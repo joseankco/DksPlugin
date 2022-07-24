@@ -6,6 +6,7 @@ import eu.darkbot.api.PluginAPI;
 import eu.darkbot.api.config.ConfigSetting;
 import eu.darkbot.api.extensions.*;
 import eu.darkbot.api.managers.*;
+import eu.darkbot.ter.dks.utils.BotRemoteController;
 import eu.darkbot.ter.dks.utils.VerifierChecker;
 import eu.darkbot.ter.dks.types.config.RemoteStatsConfig;
 import eu.darkbot.ter.dks.types.remotestats.*;
@@ -22,6 +23,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.security.NoSuchAlgorithmException;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -43,6 +45,10 @@ public class RemoteStats implements Task, Configurable<RemoteStatsConfig>, Extra
     protected final Main main;
     protected final RepairAPI repair;
     protected final BoosterAPI booster;
+    protected final ConfigAPI configAPI;
+    protected final BackpageAPI backpage;
+    protected BotRemoteController controller;
+
     private RemoteStatsConfig config;
     private long nextTick = 0;
     private final JLabel lastSuccededTime;
@@ -60,7 +66,9 @@ public class RemoteStats implements Task, Configurable<RemoteStatsConfig>, Extra
             ExtensionsAPI extensions,
             Main main,
             RepairAPI repair,
-            BoosterAPI booster
+            BoosterAPI booster,
+            ConfigAPI config,
+            BackpageAPI backpage
     ) {
         if (!Arrays.equals(VerifierChecker.class.getSigners(), getClass().getSigners()))
             throw new SecurityException();
@@ -77,9 +85,20 @@ public class RemoteStats implements Task, Configurable<RemoteStatsConfig>, Extra
         this.main = main;
         this.repair = repair;
         this.booster = booster;
+        this.configAPI = config;
+        this.backpage = backpage;
+
         this.lastRequestStatus = new JLabel("<html><b>" + this.i18n.get(this.plugin, "remote_stats.server.status.last_post") +  "</b> " + "-</html>");
         this.lastSuccededTime = new JLabel("<html><b>" + this.i18n.get(this.plugin, "remote_stats.server.status.last_success") + "</b> " + "-</html>");
         this.dksPluginInfo = DksPluginSingleton.getPluginInfo();
+
+        this.controller = new BotRemoteController(
+                this.botAPI,
+                this.main,
+                this.heroAPI,
+                this.extensions,
+                this.configAPI
+        );
     }
 
     public String getURL() {
@@ -95,11 +114,12 @@ public class RemoteStats implements Task, Configurable<RemoteStatsConfig>, Extra
         return new InfoDTO(
             new HeroDTO(this.heroAPI, this.booster),
             new StatsDTO(this.statsAPI),
-            new ModuleDTO(this.botAPI),
+            new ModuleDTO(this.botAPI, this.extensions, this.configAPI),
             new MapDTO(this.mapAPI, this.entitiesAPI),
             DksPluginSingleton.getPluginInfo(),
-            new UserDataDTO(this.main),
-            new DeathsDTO(this.repair)
+            new UserDataDTO(this.backpage),
+            new DeathsDTO(this.repair),
+            new ConfigDTO(this.configAPI, this.main)
         ).toJson();
     }
 
@@ -116,7 +136,7 @@ public class RemoteStats implements Task, Configurable<RemoteStatsConfig>, Extra
         if (this.checkTick()) {
             String url = this.getURL();
             String message = this.getMessage();
-            if (Http.sendMessage(message, url)) {
+            if (Http.sendMessage(message, url, this.controller)) {
                 this.lastRequestStatus.setText(
                         "<html><b>" +
                         this.i18n.get(this.plugin, "remote_stats.server.status.last_post") +  "</b> " +

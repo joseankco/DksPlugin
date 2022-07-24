@@ -7,6 +7,7 @@ import eu.darkbot.api.events.EventHandler;
 import eu.darkbot.api.events.Listener;
 import eu.darkbot.api.extensions.*;
 import eu.darkbot.api.managers.*;
+import eu.darkbot.ter.dks.types.logviewer.LogLine;
 import eu.darkbot.ter.dks.types.plugin.GameLogViewerDTO;
 import eu.darkbot.ter.dks.utils.VerifierChecker;
 import eu.darkbot.ter.dks.types.config.GameLogViewerConfig;
@@ -240,22 +241,5 @@ public class GameLogViewer implements Task, ExtraMenus, Configurable<GameLogView
             }
         }
         return lines;
-    }
-
-    public static class LogLine {
-        public final Date date;
-        public final String line;
-        public LogLine(Date date, String line) {
-            this.date = date;
-            this.line = line;
-        }
-
-        public Date getDate() {
-            return this.date;
-        }
-
-        public String getLine() {
-            return this.line;
-        }
     }
 }

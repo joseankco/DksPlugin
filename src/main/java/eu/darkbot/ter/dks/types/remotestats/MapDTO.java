@@ -12,6 +12,7 @@ import java.util.ArrayList;
 public class MapDTO {
     private Double boundX;
     private Double boundY;
+    private Integer id;
     private String name;
     private String mapID;
     private ArrayList<PortalDTO> portals;
@@ -20,6 +21,7 @@ public class MapDTO {
 
     public MapDTO(StarSystemAPI map, EntitiesAPI entities) {
         GameMap current = map.getCurrentMap();
+        this.id = current.getId();
         this.name = current.getName();
         this.mapID = String.valueOf(current.getId());
         this.boundX = map.getCurrentMapBounds().getX2();

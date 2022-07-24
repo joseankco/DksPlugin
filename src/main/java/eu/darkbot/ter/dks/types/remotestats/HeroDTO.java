@@ -6,12 +6,14 @@ import eu.darkbot.api.game.entities.Npc;
 import eu.darkbot.api.game.entities.Ship;
 import eu.darkbot.api.game.other.EntityInfo;
 import eu.darkbot.api.game.other.Health;
+import eu.darkbot.api.game.other.Location;
 import eu.darkbot.api.managers.BoosterAPI;
 import eu.darkbot.api.managers.HeroAPI;
 
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class HeroDTO {
     private Integer id;
@@ -30,6 +32,7 @@ public class HeroDTO {
     private String username;
     private TargetDTO target;
     private List<BoosterDTO> boosters;
+    private DestinationDTO destination;
 
     public HeroDTO(HeroAPI hero, BoosterAPI booster) {
         this.id = hero.getId();
@@ -49,6 +52,7 @@ public class HeroDTO {
         this.target = new TargetDTO(hero.getTarget());
         this.boosters = new ArrayList<>();
         booster.getBoosters().forEach(b -> this.boosters.add(new BoosterDTO(b)));
+        this.destination = new DestinationDTO(hero.getDestination());
     }
 
     public String toJson() {
@@ -131,6 +135,20 @@ public class HeroDTO {
 
         public String toJson() {
             return new Gson().toJson(this);
+        }
+    }
+
+    public static class DestinationDTO {
+        private boolean hasDestination;
+        private double x;
+        private double y;
+
+        public DestinationDTO(Optional<Location> optionalLocation) {
+            this.hasDestination = optionalLocation.isPresent();
+            optionalLocation.ifPresent(location -> {
+                this.x = location.getX();
+                this.y = location.getY();
+            });
         }
     }
 }
