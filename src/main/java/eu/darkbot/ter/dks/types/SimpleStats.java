@@ -136,19 +136,23 @@ public abstract class SimpleStats<T extends SimpleStatsConfig> implements Behavi
     protected boolean isRunningOrElseTryRun() {
         if (!this.isRunning) {
             Integer currentAmount = this.getCurrentAmount();
-            if (currentAmount != null && currentAmount > this.prevAmount) {
-                long now = System.currentTimeMillis();
-                this.runningTime = Duration.ofSeconds(0);
-                this.lastRefresh = now;
-                this.lastTick = now;
-                this.isRunning = true;
+            if (currentAmount != null) {
+                if (currentAmount > this.prevAmount) {
+                    long now = System.currentTimeMillis();
+                    this.runningTime = Duration.ofSeconds(0);
+                    this.lastRefresh = now;
+                    this.lastTick = now;
+                    this.isRunning = true;
+                } else {
+                    this.prevAmount = currentAmount;
+                }
             }
         }
         return this.isRunning;
     }
 
     protected void resetTask() {
-        this.isFirstTick = true;
+        this.initTask();
     }
 
     protected void initTask() {
