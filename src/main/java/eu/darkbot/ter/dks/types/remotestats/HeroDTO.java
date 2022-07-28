@@ -9,6 +9,8 @@ import eu.darkbot.api.game.other.Health;
 import eu.darkbot.api.game.other.Location;
 import eu.darkbot.api.managers.BoosterAPI;
 import eu.darkbot.api.managers.HeroAPI;
+import eu.darkbot.api.managers.PetAPI;
+import eu.darkbot.ter.dks.utils.Formatter;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -33,8 +35,9 @@ public class HeroDTO {
     private TargetDTO target;
     private List<BoosterDTO> boosters;
     private DestinationDTO destination;
+    private PetDTO pet;
 
-    public HeroDTO(HeroAPI hero, BoosterAPI booster) {
+    public HeroDTO(HeroAPI hero, BoosterAPI booster, PetAPI pet) {
         this.id = hero.getId();
         this.x = hero.getX();
         this.y = hero.getY();
@@ -53,6 +56,7 @@ public class HeroDTO {
         this.boosters = new ArrayList<>();
         booster.getBoosters().forEach(b -> this.boosters.add(new BoosterDTO(b)));
         this.destination = new DestinationDTO(hero.getDestination());
+        this.pet = new PetDTO(pet);
     }
 
     public String toJson() {
@@ -149,6 +153,41 @@ public class HeroDTO {
                 this.x = location.getX();
                 this.y = location.getY();
             });
+        }
+    }
+
+    public static class PetDTO {
+        private boolean isEnabled;
+        private boolean isActive;
+        private double x;
+        private double y;
+        private Integer hp;
+        private Integer maxHp;
+        private Integer shield;
+        private Integer maxShield;
+        private Double hpPercent;
+        private Double shieldPercent;
+        private double fuel;
+        private double maxFuel;
+        private Double fuelPercent;
+
+        public PetDTO(PetAPI pet) {
+            this.isEnabled = pet.isEnabled();
+            this.isActive = pet.isActive();
+            Health h = pet.getHealth();
+            this.hp = h.getHp();
+            this.maxHp = h.getMaxHp();
+            this.shield = h.getShield();
+            this.maxShield = h.getMaxShield();
+            this.hpPercent = h.hpPercent();
+            this.shieldPercent = h.shieldPercent();
+            Location l = pet.getLocationInfo();
+            this.x = l.getX();
+            this.y = l.getY();
+            PetAPI.PetStat ps = pet.getStat(PetAPI.Stat.FUEL);
+            this.fuel = ps == null ? 0D : ps.getCurrent();
+            this.maxFuel = ps == null ? 0D : ps.getTotal();
+            this.fuelPercent = this.fuel / this.maxFuel;
         }
     }
 }

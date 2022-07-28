@@ -30,4 +30,11 @@ public class Formatter {
         }
         return sb.toString();
     }
+
+    public static double safeDouble(double d) {
+        if (Double.isNaN(d) || Double.isInfinite(d)) {
+            return 0D;
+        }
+        return d;
+    }
 }

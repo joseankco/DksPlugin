@@ -1,6 +1,8 @@
 package eu.darkbot.ter.dks.types.remotestats;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import eu.darkbot.ter.dks.utils.NumberOnlyTypeAdapterFactory;
 import eu.darkbot.ter.dks.utils.plugin.DksPluginInfo;
 
 public class InfoDTO {
@@ -36,6 +38,11 @@ public class InfoDTO {
     }
 
     public String toJson() {
-        return new Gson().toJson(this);
+        Gson gson = new GsonBuilder()
+                .disableHtmlEscaping()
+                .registerTypeAdapterFactory(NumberOnlyTypeAdapterFactory.getInstance())
+                .create();
+
+        return gson.toJson(this);
     }
 }

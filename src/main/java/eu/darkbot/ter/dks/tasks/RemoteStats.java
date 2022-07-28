@@ -47,6 +47,7 @@ public class RemoteStats implements Task, Configurable<RemoteStatsConfig>, Extra
     protected final BoosterAPI booster;
     protected final ConfigAPI configAPI;
     protected final BackpageAPI backpage;
+    protected final PetAPI pet;
     protected BotRemoteController controller;
 
     private RemoteStatsConfig config;
@@ -68,7 +69,8 @@ public class RemoteStats implements Task, Configurable<RemoteStatsConfig>, Extra
             RepairAPI repair,
             BoosterAPI booster,
             ConfigAPI config,
-            BackpageAPI backpage
+            BackpageAPI backpage,
+            PetAPI pet
     ) {
         if (!Arrays.equals(VerifierChecker.class.getSigners(), getClass().getSigners()))
             throw new SecurityException();
@@ -87,6 +89,7 @@ public class RemoteStats implements Task, Configurable<RemoteStatsConfig>, Extra
         this.booster = booster;
         this.configAPI = config;
         this.backpage = backpage;
+        this.pet = pet;
 
         this.lastRequestStatus = new JLabel("<html><b>" + this.i18n.get(this.plugin, "remote_stats.server.status.last_post") +  "</b> " + "-</html>");
         this.lastSuccededTime = new JLabel("<html><b>" + this.i18n.get(this.plugin, "remote_stats.server.status.last_success") + "</b> " + "-</html>");
@@ -97,7 +100,8 @@ public class RemoteStats implements Task, Configurable<RemoteStatsConfig>, Extra
                 this.main,
                 this.heroAPI,
                 this.extensions,
-                this.configAPI
+                this.configAPI,
+                this.statsAPI
         );
     }
 
@@ -112,7 +116,7 @@ public class RemoteStats implements Task, Configurable<RemoteStatsConfig>, Extra
 
     public String getMessage() {
         return new InfoDTO(
-            new HeroDTO(this.heroAPI, this.booster),
+            new HeroDTO(this.heroAPI, this.booster, this.pet),
             new StatsDTO(this.statsAPI),
             new ModuleDTO(this.botAPI, this.extensions, this.configAPI),
             new MapDTO(this.mapAPI, this.entitiesAPI),

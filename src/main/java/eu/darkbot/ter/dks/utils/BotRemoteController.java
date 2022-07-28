@@ -3,10 +3,7 @@ package eu.darkbot.ter.dks.utils;
 import com.github.manolo8.darkbot.Main;
 import com.github.manolo8.darkbot.config.ConfigHandler;
 import com.google.gson.Gson;
-import eu.darkbot.api.managers.BotAPI;
-import eu.darkbot.api.managers.ConfigAPI;
-import eu.darkbot.api.managers.ExtensionsAPI;
-import eu.darkbot.api.managers.HeroAPI;
+import eu.darkbot.api.managers.*;
 
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
@@ -17,10 +14,13 @@ import java.util.Objects;
 public class BotRemoteController {
     protected ServerReponse response;
     protected long lastTick;
+
     protected BotAPI bot;
     protected Main main;
     protected ExtensionsAPI extensions;
     protected ConfigAPI config;
+    protected StatsAPI stats;
+
     protected String id;
     protected String hashedId;
 
@@ -29,7 +29,8 @@ public class BotRemoteController {
             Main main,
             HeroAPI hero,
             ExtensionsAPI extensions,
-            ConfigAPI config
+            ConfigAPI config,
+            StatsAPI stats
     ) {
         this.response = new ServerReponse();
         this.lastTick = 0L;
@@ -39,6 +40,7 @@ public class BotRemoteController {
         this.hashedId = this.getHashedId();
         this.extensions = extensions;
         this.config = config;
+        this.stats = stats;
     }
 
     private String getHashedId() {
@@ -87,6 +89,11 @@ public class BotRemoteController {
         this.main.setConfig(name);
     }
 
+    private void resetBotStats() {
+        System.out.println("[" + this.hashedId + "] Reset Stats");
+        this.stats.resetStats();
+    }
+
     public boolean doAction() {
         System.out.println("[" + this.hashedId + "] Processing Action: " + this.response.action);
         switch (this.response.action) {
@@ -104,6 +111,9 @@ public class BotRemoteController {
                 break;
             case "profile":
                 this.changeProfile(this.response.parameter);
+                break;
+            case "reset_bot_stats":
+                this.resetBotStats();
                 break;
             case "none":
                 return false;

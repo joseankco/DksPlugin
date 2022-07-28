@@ -1,8 +1,10 @@
 package eu.darkbot.ter.dks.types.remotestats;
 
+import eu.darkbot.api.game.entities.Barrier;
 import eu.darkbot.api.game.entities.Npc;
 import eu.darkbot.api.game.entities.Player;
 import eu.darkbot.api.game.entities.Portal;
+import eu.darkbot.api.game.other.Area;
 import eu.darkbot.api.game.other.GameMap;
 import eu.darkbot.api.managers.EntitiesAPI;
 import eu.darkbot.api.managers.StarSystemAPI;
@@ -18,6 +20,7 @@ public class MapDTO {
     private ArrayList<PortalDTO> portals;
     private ArrayList<NpcDTO> npcs;
     private ArrayList<PlayerDTO> players;
+    private ArrayList<BarrierDTO> barriers;
 
     public MapDTO(StarSystemAPI map, EntitiesAPI entities) {
         GameMap current = map.getCurrentMap();
@@ -29,9 +32,11 @@ public class MapDTO {
         portals = new ArrayList<>();
         npcs = new ArrayList<>();
         players = new ArrayList<>();
+        barriers = new ArrayList<>();
         entities.getPortals().forEach(portal -> portals.add(new PortalDTO(portal)));
         entities.getNpcs().forEach(npc -> npcs.add(new NpcDTO(npc)));
         entities.getPlayers().forEach(player -> players.add(new PlayerDTO(player)));
+        entities.getBarriers().forEach(barrier -> barriers.add(new BarrierDTO(barrier)));
     }
 
     public static class NpcDTO {
@@ -64,6 +69,21 @@ public class MapDTO {
         public PortalDTO(Portal portal) {
             this.x = portal.getX();
             this.y = portal.getY();
+        }
+    }
+
+    public static class BarrierDTO {
+        private double x1;
+        private double x2;
+        private double y1;
+        private double y2;
+
+        public BarrierDTO(Barrier barrier) {
+            Area.Rectangle r = barrier.getZoneArea().getBounds();
+            this.x1 = r.getX();
+            this.y1 = r.getY();
+            this.x2 = r.getX2();
+            this.y2 = r.getY2();
         }
     }
 }
