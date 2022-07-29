@@ -33,10 +33,10 @@ public class MapDTO {
         npcs = new ArrayList<>();
         players = new ArrayList<>();
         barriers = new ArrayList<>();
-        entities.getPortals().forEach(portal -> portals.add(new PortalDTO(portal)));
-        entities.getNpcs().forEach(npc -> npcs.add(new NpcDTO(npc)));
-        entities.getPlayers().forEach(player -> players.add(new PlayerDTO(player)));
-        entities.getBarriers().forEach(barrier -> barriers.add(new BarrierDTO(barrier)));
+        new ArrayList<>(entities.getPortals()).forEach(portal -> portals.add(new PortalDTO(portal)));
+        new ArrayList<>(entities.getNpcs()).forEach(npc -> npcs.add(new NpcDTO(npc)));
+        new ArrayList<>(entities.getPlayers()).forEach(player -> players.add(new PlayerDTO(player)));
+        new ArrayList<>(entities.getBarriers()).forEach(barrier -> barriers.add(new BarrierDTO(barrier)));
     }
 
     public static class NpcDTO {
