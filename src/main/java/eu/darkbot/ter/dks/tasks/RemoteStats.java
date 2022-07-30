@@ -23,7 +23,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.security.NoSuchAlgorithmException;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -31,7 +30,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Objects;
 
-@Feature(name = "Remote Stats", description = "Allows you to monitor your botting session remotelly")
+@Feature(name = "Remote Stats", description = "Allows you to monitor and control your botting session remotelly")
 public class RemoteStats implements Task, Configurable<RemoteStatsConfig>, ExtraMenus, InstructionProvider {
 
     protected final HeroAPI heroAPI;
